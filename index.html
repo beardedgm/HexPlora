@@ -21,8 +21,8 @@
   <div class="map-url-container mb-3">
     <label for="map-url">Map URL:</label>
     <div class="url-input-group input-group">
-      <input type="text" class="form-control" id="map-url" placeholder="Enter map image URL here or leave blank for default">
-      <button id="load-url-btn" class="btn btn-primary">Load Map</button>
+      <input type="text" class="form-control form-control-sm" id="map-url" placeholder="Enter map image URL here or leave blank for default">
+      <button id="load-url-btn" class="btn btn-primary btn-sm">Load Map</button>
     </div>
   </div>
 
@@ -31,34 +31,34 @@
       <h2>Grid Settings</h2>
       <div class="control-group">
         <label for="hex-size">Hex Size (px)</label>
-        <input type="number" class="form-control" id="hex-size" min="10" max="300" value="40">
+        <input type="number" class="form-control form-control-sm" id="hex-size" min="10" max="300" value="40">
       </div>
       <div class="control-group">
         <label for="offset-x">Grid X Offset (px)</label>
-        <input type="number" class="form-control" id="offset-x" min="-1000" max="1000" value="0">
+        <input type="number" class="form-control form-control-sm" id="offset-x" min="-1000" max="1000" value="0">
       </div>
       <div class="control-group">
         <label for="offset-y">Grid Y Offset (px)</label>
-        <input type="number" class="form-control" id="offset-y" min="-1000" max="1000" value="0">
+        <input type="number" class="form-control form-control-sm" id="offset-y" min="-1000" max="1000" value="0">
       </div>
       <div class="control-group">
         <label for="columns">Columns</label>
-        <input type="number" class="form-control" id="columns" min="1" max="200" value="20">
+        <input type="number" class="form-control form-control-sm" id="columns" min="1" max="200" value="20">
       </div>
       <div class="control-group">
         <label for="rows">Rows</label>
-        <input type="number" class="form-control" id="rows" min="1" max="200" value="15">
+        <input type="number" class="form-control form-control-sm" id="rows" min="1" max="200" value="15">
       </div>
       <div class="control-group">
         <label for="orientation">Grid Orientation</label>
-        <select id="orientation" class="form-select" title="Choose pointy-top or flat-top grid">
+        <select id="orientation" class="form-select form-select-sm" title="Choose pointy-top or flat-top grid">
           <option value="pointy">Pointy-Top</option>
           <option value="flat">Flat-Top</option>
         </select>
       </div>
       <div class="control-group">
         <label for="map-scale">Map Scale (%)</label>
-        <input type="number" class="form-control" id="map-scale" min="10" max="500" value="100" title="Visual scale of the map image itself">
+        <input type="number" class="form-control form-control-sm" id="map-scale" min="10" max="500" value="100" title="Visual scale of the map image itself">
       </div>
     </div>
 
@@ -66,7 +66,7 @@
       <h2>Appearance</h2>
       <div class="control-group">
         <label for="fog-color">Fog Color</label>
-        <input type="color" class="form-control form-control-color" id="fog-color" value="#225522">
+        <input type="color" class="form-control form-control-color form-control-sm" id="fog-color" value="#225522">
       </div>
       <div class="control-group">
         <label for="fog-opacity">Fog Opacity</label>
@@ -74,7 +74,7 @@
       </div>
       <div class="control-group">
         <label for="grid-color">Grid Line Color</label>
-        <input type="color" class="form-control form-control-color" id="grid-color" value="#FFFFFF">
+        <input type="color" class="form-control form-control-color form-control-sm" id="grid-color" value="#FFFFFF">
       </div>
       <div class="control-group">
         <label for="grid-thickness">Grid Line Thickness</label>
@@ -82,29 +82,29 @@
       </div>
       <div class="control-group">
         <label for="token-color">Token Color</label>
-        <input type="color" class="form-control form-control-color" id="token-color" value="#FF0000">
+        <input type="color" class="form-control form-control-color form-control-sm" id="token-color" value="#FF0000">
       </div>
     </div>
   </div>
 
   <div class="button-row d-flex flex-wrap gap-2 mt-3 pt-3 border-top">
-    <button id="toggle-mode-btn" class="btn btn-primary">Mode: Reveal</button>
-    <button id="add-token-btn" class="btn btn-info">Add Token</button>
-    <button id="remove-token-btn" class="btn btn-warning">Remove Token</button>
-    <button id="reset-view-btn" class="btn btn-info">Reset View</button>
-    <button id="reset-map-btn" class="btn btn-danger">Reset Fog</button>
-    <button id="clear-tokens-btn" class="btn btn-danger">Clear Tokens</button>
-    <button id="debug-toggle" class="btn btn-secondary">Toggle Debug</button>
-    <button id="export-btn" class="btn btn-success">Export State</button>
+    <button id="toggle-mode-btn" class="btn btn-primary btn-sm">Mode: Reveal</button>
+    <button id="add-token-btn" class="btn btn-info btn-sm">Add Token</button>
+    <button id="remove-token-btn" class="btn btn-warning btn-sm">Remove Token</button>
+    <button id="reset-view-btn" class="btn btn-info btn-sm">Reset View</button>
+    <button id="reset-map-btn" class="btn btn-danger btn-sm">Reset Fog</button>
+    <button id="clear-tokens-btn" class="btn btn-danger btn-sm">Clear Tokens</button>
+    <button id="debug-toggle" class="btn btn-secondary btn-sm">Toggle Debug</button>
+    <button id="export-btn" class="btn btn-success btn-sm">Export State</button>
     <div class="file-input-container">
-      <button class="btn btn-success">Import State</button>
+      <button class="btn btn-success btn-sm">Import State</button>
       <input type="file" id="import-file" class="file-input" accept=".json">
     </div>
   </div>
 </div>
 
 <div class="header-toggle position-fixed top-0 end-0 m-2">
-  <button id="toggle-header-btn" class="btn btn-primary">Hide Header</button>
+  <button id="toggle-header-btn" class="btn btn-primary btn-sm">Hide Header</button>
 </div>
 
 <div class="map-container" id="map-container">
@@ -116,8 +116,8 @@
   <span id="zoom-display">Zoom: 100%</span>
   <span id="coord-display">Hex: ---</span>
   <div id="status-indicator"></div>
-  <button id="undo-btn" class="btn btn-secondary" disabled>Undo</button>
-  <button id="redo-btn" class="btn btn-secondary" disabled>Redo</button>
+  <button id="undo-btn" class="btn btn-secondary btn-sm" disabled>Undo</button>
+  <button id="redo-btn" class="btn btn-secondary btn-sm" disabled>Redo</button>
 </div>
 
 <div id="debug-info"></div>
@@ -133,8 +133,8 @@
       <textarea id="export-json" readonly></textarea>
     </div>
     <div class="modal-footer">
-      <button id="copy-json-btn" class="btn btn-primary">Copy to Clipboard</button>
-      <button id="download-json-btn" class="btn btn-success">Download as File</button>
+      <button id="copy-json-btn" class="btn btn-primary btn-sm">Copy to Clipboard</button>
+      <button id="download-json-btn" class="btn btn-success btn-sm">Download as File</button>
     </div>
   </div>
 </div>
