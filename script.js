@@ -1296,8 +1296,10 @@ document.addEventListener('DOMContentLoaded', function() {
             headerContent.classList.remove('collapsed');
         }
         
-        // Update button text
-        toggleHeaderBtn.textContent = isVisible ? 'Show Header' : 'Hide Header';
+        // Update button icon
+        toggleHeaderBtn.innerHTML = isVisible ?
+            '<i class="bi bi-caret-down-fill"></i>' :
+            '<i class="bi bi-caret-up-fill"></i>';
         
         log(`Header ${isVisible ? 'hidden' : 'shown'}`);
         showStatus(`Header ${isVisible ? 'hidden' : 'shown'}`, 'info');

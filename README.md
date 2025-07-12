@@ -52,6 +52,6 @@ A row of buttons below the settings provides quick actions:
 - **Toggle Debug** – shows internal debug information.
 - **Export State** – opens a modal to copy or download the current state as JSON.
 - **Import State** – load a JSON file previously exported.
-- **Hide Header** – collapses the control panel to maximize map space.
+- **Header Toggle** (caret icon) – collapses or expands the control panel.
 
 Status indicators at the bottom display the current zoom level and hovered hex. Pan with the middle or right mouse button and zoom with the scroll wheel.
