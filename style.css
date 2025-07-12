@@ -105,6 +105,8 @@ h1 {
     padding: 0.75rem;
     border-radius: 4px;
     background-color: #2d3748;
+    flex: 1 1 320px; /* Allow panels to share a row */
+    min-width: 250px; /* Prevent items from getting too small */
 }
 
 .controls h2 {
@@ -396,4 +398,10 @@ textarea#export-json {
     border-radius: 3px;
     display: none;
     font-weight: bold;
+}
+
+@media (max-width: 576px) {
+    .controls {
+        flex-basis: 100%;
+    }
 }
