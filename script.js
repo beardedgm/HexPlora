@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportBtn = document.getElementById('export-btn');
     const importFile = document.getElementById('import-file');
     const toggleModeBtn = document.getElementById('toggle-mode-btn');
-    const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+    const toggleHeaderBtn = document.getElementById('toggle-header-btn');
     const resetViewBtn = document.getElementById('reset-view-btn');
     const addTokenBtn = document.getElementById('add-token-btn');
     const removeTokenBtn = document.getElementById('remove-token-btn');
@@ -245,8 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Toggle mode button
         toggleModeBtn.addEventListener('click', toggleMode);
         
-        // Toggle sidebar button
-        toggleSidebarBtn.addEventListener('click', toggleSidebar);
+        // Toggle header button
+        toggleHeaderBtn.addEventListener('click', toggleHeader);
         
         resetBtn.addEventListener('click', resetMap);
         
@@ -1158,25 +1158,23 @@ document.addEventListener('DOMContentLoaded', function() {
         drawMap(); // Redraw to update any debug info
     }
     
-    // Toggle sidebar panel
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const isVisible = !sidebar.classList.contains('collapsed');
-
+    // Toggle header panel
+    function toggleHeader() {
+        const headerContent = document.getElementById('header-content');
+        const isVisible = !headerContent.classList.contains('collapsed');
+        
+        // Toggle visibility
         if (isVisible) {
-            sidebar.classList.add('collapsed');
-            document.body.classList.add('sidebar-collapsed');
+            headerContent.classList.add('collapsed');
         } else {
-            sidebar.classList.remove('collapsed');
-            document.body.classList.remove('sidebar-collapsed');
+            headerContent.classList.remove('collapsed');
         }
-
+        
         // Update button text
-        toggleSidebarBtn.textContent = isVisible ? 'Show Menu' : 'Hide Menu';
-
-        log(`Sidebar ${isVisible ? 'hidden' : 'shown'}`);
-        showStatus(`Sidebar ${isVisible ? 'hidden' : 'shown'}`, 'info');
-        drawMap();
+        toggleHeaderBtn.textContent = isVisible ? 'Show Header' : 'Hide Header';
+        
+        log(`Header ${isVisible ? 'hidden' : 'shown'}`);
+        showStatus(`Header ${isVisible ? 'hidden' : 'shown'}`, 'info');
     }
     
     function updateInputFields() {
