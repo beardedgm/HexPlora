@@ -13,6 +13,7 @@ HexPlora is a web-based viewer for tabletop-style maps. It overlays a hexagonal 
 - Zoom and pan support with mouse wheel and drag controls.
 - Import/export of the full map state (tokens with labels, revealed hexes, settings).
 - Toggleable header and optional debug view.
+- Interface styled with the Bulma CSS framework.
 
 ## Opening `index.html`
 

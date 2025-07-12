@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Hex Map Viewer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="./style.css">
 
 </head>
@@ -16,93 +17,123 @@
     </div>
   </div>
 
-  <div class="map-url-container">
-    <label for="map-url">Map URL:</label>
-    <div class="url-input-group">
-      <input type="text" id="map-url" placeholder="Enter map image URL here or leave blank for default">
-      <button id="load-url-btn" class="btn btn-primary">Load Map</button>
+  <div class="map-url-container field">
+    <label class="label" for="map-url">Map URL:</label>
+    <div class="field has-addons url-input-group">
+      <div class="control is-expanded">
+        <input class="input" type="text" id="map-url" placeholder="Enter map image URL here or leave blank for default">
+      </div>
+      <div class="control">
+        <button id="load-url-btn" class="button is-primary">Load Map</button>
+      </div>
     </div>
   </div>
 
   <div class="controls-section">
     <div class="controls" id="grid-settings-panel">
       <h2>Grid Settings</h2>
-      <div class="control-group">
-        <label for="hex-size">Hex Size (px)</label>
-        <input type="number" id="hex-size" min="10" max="300" value="40">
+      <div class="field control-group">
+        <label class="label" for="hex-size">Hex Size (px)</label>
+        <div class="control">
+          <input class="input" type="number" id="hex-size" min="10" max="300" value="40">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="offset-x">Grid X Offset (px)</label>
-        <input type="number" id="offset-x" min="-1000" max="1000" value="0">
+      <div class="field control-group">
+        <label class="label" for="offset-x">Grid X Offset (px)</label>
+        <div class="control">
+          <input class="input" type="number" id="offset-x" min="-1000" max="1000" value="0">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="offset-y">Grid Y Offset (px)</label>
-        <input type="number" id="offset-y" min="-1000" max="1000" value="0">
+      <div class="field control-group">
+        <label class="label" for="offset-y">Grid Y Offset (px)</label>
+        <div class="control">
+          <input class="input" type="number" id="offset-y" min="-1000" max="1000" value="0">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="columns">Columns</label>
-        <input type="number" id="columns" min="1" max="200" value="20">
+      <div class="field control-group">
+        <label class="label" for="columns">Columns</label>
+        <div class="control">
+          <input class="input" type="number" id="columns" min="1" max="200" value="20">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="rows">Rows</label>
-        <input type="number" id="rows" min="1" max="200" value="15">
+      <div class="field control-group">
+        <label class="label" for="rows">Rows</label>
+        <div class="control">
+          <input class="input" type="number" id="rows" min="1" max="200" value="15">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="orientation">Grid Orientation</label>
-        <select id="orientation" title="Choose pointy-top or flat-top grid">
-          <option value="pointy">Pointy-Top</option>
-          <option value="flat">Flat-Top</option>
-        </select>
+      <div class="field control-group">
+        <label class="label" for="orientation">Grid Orientation</label>
+        <div class="control">
+          <div class="select">
+            <select id="orientation" title="Choose pointy-top or flat-top grid">
+              <option value="pointy">Pointy-Top</option>
+              <option value="flat">Flat-Top</option>
+            </select>
+          </div>
+        </div>
       </div>
-      <div class="control-group">
-        <label for="map-scale">Map Scale (%)</label>
-        <input type="number" id="map-scale" min="10" max="500" value="100" title="Visual scale of the map image itself">
+      <div class="field control-group">
+        <label class="label" for="map-scale">Map Scale (%)</label>
+        <div class="control">
+          <input class="input" type="number" id="map-scale" min="10" max="500" value="100" title="Visual scale of the map image itself">
+        </div>
       </div>
     </div>
 
     <div class="controls" id="appearance-settings-panel">
       <h2>Appearance</h2>
-      <div class="control-group">
-        <label for="fog-color">Fog Color</label>
-        <input type="color" id="fog-color" value="#225522">
+      <div class="field control-group">
+        <label class="label" for="fog-color">Fog Color</label>
+        <div class="control">
+          <input class="input" type="color" id="fog-color" value="#225522">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="fog-opacity">Fog Opacity</label>
-        <input type="range" id="fog-opacity" min="0" max="1" step="0.05" value="0.85">
+      <div class="field control-group">
+        <label class="label" for="fog-opacity">Fog Opacity</label>
+        <div class="control">
+          <input class="input" type="range" id="fog-opacity" min="0" max="1" step="0.05" value="0.85">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="grid-color">Grid Line Color</label>
-        <input type="color" id="grid-color" value="#FFFFFF">
+      <div class="field control-group">
+        <label class="label" for="grid-color">Grid Line Color</label>
+        <div class="control">
+          <input class="input" type="color" id="grid-color" value="#FFFFFF">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="grid-thickness">Grid Line Thickness</label>
-        <input type="range" id="grid-thickness" min="0.1" max="5" step="0.1" value="1">
+      <div class="field control-group">
+        <label class="label" for="grid-thickness">Grid Line Thickness</label>
+        <div class="control">
+          <input class="input" type="range" id="grid-thickness" min="0.1" max="5" step="0.1" value="1">
+        </div>
       </div>
-      <div class="control-group">
-        <label for="token-color">Token Color</label>
-        <input type="color" id="token-color" value="#FF0000">
+      <div class="field control-group">
+        <label class="label" for="token-color">Token Color</label>
+        <div class="control">
+          <input class="input" type="color" id="token-color" value="#FF0000">
+        </div>
       </div>
     </div>
   </div>
 
   <div class="button-row">
-    <button id="toggle-mode-btn" class="btn btn-primary">Mode: Reveal</button>
-    <button id="add-token-btn" class="btn btn-info">Add Token</button>
-    <button id="remove-token-btn" class="btn btn-warning">Remove Token</button>
-    <button id="reset-view-btn" class="btn btn-info">Reset View</button>
-    <button id="reset-map-btn" class="btn btn-danger">Reset Fog</button>
-    <button id="clear-tokens-btn" class="btn btn-danger">Clear Tokens</button>
-    <button id="debug-toggle" class="btn btn-secondary">Toggle Debug</button>
-    <button id="export-btn" class="btn btn-success">Export State</button>
+    <button id="toggle-mode-btn" class="button is-primary">Mode: Reveal</button>
+    <button id="add-token-btn" class="button is-info">Add Token</button>
+    <button id="remove-token-btn" class="button is-warning">Remove Token</button>
+    <button id="reset-view-btn" class="button is-info">Reset View</button>
+    <button id="reset-map-btn" class="button is-danger">Reset Fog</button>
+    <button id="clear-tokens-btn" class="button is-danger">Clear Tokens</button>
+    <button id="debug-toggle" class="button is-dark">Toggle Debug</button>
+    <button id="export-btn" class="button is-success">Export State</button>
     <div class="file-input-container">
-      <button class="btn btn-success">Import State</button>
+      <button class="button is-success">Import State</button>
       <input type="file" id="import-file" class="file-input" accept=".json">
     </div>
   </div>
 </div>
 
 <div class="header-toggle">
-  <button id="toggle-header-btn" class="btn btn-primary">Hide Header</button>
+  <button id="toggle-header-btn" class="button is-primary">Hide Header</button>
 </div>
 
 <div class="map-container" id="map-container">
@@ -114,26 +145,27 @@
   <span id="zoom-display">Zoom: 100%</span>
   <span id="coord-display">Hex: ---</span>
   <div id="status-indicator"></div>
-  <button id="undo-btn" class="btn btn-secondary" disabled>Undo</button>
-  <button id="redo-btn" class="btn btn-secondary" disabled>Redo</button>
+  <button id="undo-btn" class="button is-dark" disabled>Undo</button>
+  <button id="redo-btn" class="button is-dark" disabled>Redo</button>
 </div>
 
 <div id="debug-info"></div>
 
 <div id="export-modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Export Map State</h2>
-      <span class="close" id="export-modal-close">&times;</span>
-    </div>
-    <div class="modal-body">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Export Map State</p>
+      <button class="delete" id="export-modal-close" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
       <p>Copy the following JSON to save your map state:</p>
-      <textarea id="export-json" readonly></textarea>
-    </div>
-    <div class="modal-footer">
-      <button id="copy-json-btn" class="btn btn-primary">Copy to Clipboard</button>
-      <button id="download-json-btn" class="btn btn-success">Download as File</button>
-    </div>
+      <textarea id="export-json" class="textarea" readonly></textarea>
+    </section>
+    <footer class="modal-card-foot">
+      <button id="copy-json-btn" class="button is-primary">Copy to Clipboard</button>
+      <button id="download-json-btn" class="button is-success">Download as File</button>
+    </footer>
   </div>
 </div>
 <!-- partial -->
