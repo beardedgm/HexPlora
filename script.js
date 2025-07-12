@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Copy JSON to clipboard
         copyJsonBtn.addEventListener('click', function() {
             exportJsonTextarea.select();
-            document.execCommand('copy');
+            navigator.clipboard.writeText(exportJsonTextarea.value);
             showStatus('Copied to clipboard!', 'success');
         });
         
