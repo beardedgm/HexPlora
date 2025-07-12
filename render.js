@@ -107,6 +107,18 @@ export function drawMap(ctx, canvas, ui) {
             ctx.lineWidth = 1;
             ctx.stroke();
         }
+
+        if (token.label) {
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            const textY = token.y + state.hexSize * 0.5;
+            ctx.strokeText(token.label, token.x, textY);
+            ctx.fillText(token.label, token.x, textY);
+        }
     }
     if (state.debugMode) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
