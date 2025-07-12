@@ -76,6 +76,9 @@ h1 {
     color: #e2e8f0;
     min-width: 100px; /* Prevent input becoming too small */
 }
+#map-url.invalid-input {
+    border: 1px solid #e53e3e; /* Highlight invalid URL */
+}
 #map-url::placeholder {
     color: #718096;
 }
