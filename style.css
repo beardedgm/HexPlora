@@ -417,6 +417,11 @@ textarea#export-json {
     border-radius: 3px;
 }
 
+#undo-btn, #redo-btn {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+}
+
 #status-indicator {
     padding: 3px 8px;
     border-radius: 3px;

@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // New display elements
     const zoomDisplay = document.getElementById('zoom-display');
     const coordDisplay = document.getElementById('coord-display');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
     
     // Export modal elements
     const exportModal = document.getElementById('export-modal');
@@ -88,6 +90,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let isAddingToken = false;
     let isRemovingToken = false;
 
+    // History stacks for undo/redo
+    let undoStack = [];
+    let redoStack = [];
+
     function hexToRgb(hex) {
         hex = hex.replace('#', '');
         if (hex.length === 3) {
@@ -112,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInputFields();
         setupEventListeners();
         loadMap();
+        updateUndoRedoButtons();
         log('App initialized');
     }
     
@@ -273,6 +280,8 @@ document.addEventListener('DOMContentLoaded', function() {
         addTokenBtn.addEventListener('click', toggleAddTokenMode);
         removeTokenBtn.addEventListener('click', toggleRemoveTokenMode);
         clearTokensBtn.addEventListener('click', clearTokens);
+        undoBtn.addEventListener('click', undo);
+        redoBtn.addEventListener('click', redo);
         
         loadUrlBtn.addEventListener('click', function() {
             const url = mapUrlInput.value.trim();
@@ -393,6 +402,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 event.preventDefault();
                 toggleAddTokenMode();
             }
+
+            // Ctrl+Z to undo
+            if (event.ctrlKey && event.key === 'z') {
+                event.preventDefault();
+                undo();
+            }
+
+            // Ctrl+Y to redo
+            if (event.ctrlKey && event.key === 'y') {
+                event.preventDefault();
+                redo();
+            }
             
             // Escape to cancel add token mode or reset selection
             if (event.key === 'Escape') {
@@ -410,6 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedTokenIndex = -1;
                 drawMap();
                 saveState();
+                pushHistory();
                 showStatus('Token deleted', 'info');
             }
         });
@@ -506,6 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             generateHexGrid();
             drawMap();
+            pushHistory();
         };
         
         img.onerror = function(error) {
@@ -764,6 +787,60 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    function snapshotState() {
+        return {
+            revealedHexes: JSON.parse(JSON.stringify(revealedHexes)),
+            tokens: JSON.parse(JSON.stringify(tokens)),
+            zoomLevel,
+            panX,
+            panY
+        };
+    }
+
+    function restoreSnapshot(snap) {
+        revealedHexes = JSON.parse(JSON.stringify(snap.revealedHexes));
+        tokens = JSON.parse(JSON.stringify(snap.tokens));
+        zoomLevel = snap.zoomLevel;
+        panX = snap.panX;
+        panY = snap.panY;
+
+        for (const hex of hexes) {
+            hex.revealed = !!revealedHexes[hex.id];
+        }
+
+        saveState();
+        drawMap();
+    }
+
+    function pushHistory() {
+        undoStack.push(snapshotState());
+        if (undoStack.length > 100) undoStack.shift();
+        redoStack = [];
+        updateUndoRedoButtons();
+    }
+
+    function undo() {
+        if (undoStack.length <= 1) return;
+        const current = undoStack.pop();
+        redoStack.push(current);
+        const previous = undoStack[undoStack.length - 1];
+        restoreSnapshot(previous);
+        updateUndoRedoButtons();
+    }
+
+    function redo() {
+        if (redoStack.length === 0) return;
+        const state = redoStack.pop();
+        undoStack.push(state);
+        restoreSnapshot(state);
+        updateUndoRedoButtons();
+    }
+
+    function updateUndoRedoButtons() {
+        if (undoBtn) undoBtn.disabled = undoStack.length <= 1;
+        if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    }
     
     function isPointInHex(px, py, hex) {
         // Adjust point coordinates for zoom and pan
@@ -842,6 +919,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedTokenIndex = -1;
                 saveState();
                 drawMap();
+                pushHistory();
                 showStatus('Token removed', 'success');
             } else {
                 showStatus('No token at that location', 'warning');
@@ -896,12 +974,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     hex.revealed = false;
                     delete revealedHexes[hex.id];
                 }
-                
+
                 hexFound = true;
-                
+
                 // Save state and redraw
                 saveState();
                 drawMap();
+                pushHistory();
                 break;
             }
         }
@@ -973,6 +1052,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isDraggingToken = false;
             mapContainer.classList.remove('token-dragging');
             saveState(); // Save state after the token is moved
+            pushHistory();
             log('Stopped token dragging');
         }
     }
@@ -1043,7 +1123,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Save state and redraw
             saveState();
             drawMap();
-            
+            pushHistory();
+
             log('Map reset');
             showStatus('Map has been reset', 'info');
         }
@@ -1074,9 +1155,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update display and redraw
         drawMap();
-        
+
         log('View reset');
         showStatus('View has been reset', 'info');
+        pushHistory();
     }
     
     // Add a token at the specified position
@@ -1105,7 +1187,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save state and redraw
         saveState();
         drawMap();
-        
+        pushHistory();
+
         log(`Added token at ${Math.round(worldX)}, ${Math.round(worldY)}`);
         showStatus(`Token added (click and drag to move)`, 'success');
     }
@@ -1178,6 +1261,7 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedTokenIndex = -1;
             saveState();
             drawMap();
+            pushHistory();
             log('All tokens cleared');
             showStatus('All tokens removed', 'info');
         }
