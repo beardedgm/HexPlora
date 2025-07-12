@@ -244,16 +244,28 @@ document.addEventListener('DOMContentLoaded', function() {
         
         loadUrlBtn.addEventListener('click', function() {
             const url = mapUrlInput.value.trim();
-            if (url) {
-                loadMap(url);
-            } else {
-                alert('Please enter a valid URL');
+            if (!url) {
+                showStatus('Please enter a map URL.', 'warning');
+                return;
             }
+
+            if (!isValidMapUrl(url)) {
+                showStatus('Invalid URL. Please use http or https.', 'error');
+                return;
+            }
+
+            loadMap(url);
         });
         
-        // Add a listener for the URL input to validate URLs on paste/change
+        // Validate the URL as the user types
         mapUrlInput.addEventListener('input', function() {
-            // Could add URL validation here if needed
+            const url = mapUrlInput.value.trim();
+            if (!url || isValidMapUrl(url)) {
+                mapUrlInput.classList.remove('invalid-input');
+            } else {
+                mapUrlInput.classList.add('invalid-input');
+                showStatus('Invalid URL format. Use http or https.', 'warning');
+            }
         });
         
         mapUrlInput.addEventListener('keypress', function(event) {
@@ -389,6 +401,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         return value;
+    }
+
+    // Simple URL validation to ensure http or https scheme
+    function isValidMapUrl(url) {
+        try {
+            const parsed = new URL(url);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        } catch (e) {
+            return false;
+        }
     }
     
     function loadMap(mapUrl) {
