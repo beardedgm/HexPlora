@@ -749,18 +749,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return -1; // No token found
     }
+
+    // Get mouse coordinates relative to the canvas
+    function getCanvasCoords(event, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (event.clientY - rect.top) * scaleY
+        };
+    }
     
     function handleCanvasClick(event) {
         if (!mapImage) return;
         
         // Calculate click position in canvas coordinates
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        
-        // Get raw click coordinates
-        const x = (event.clientX - rect.left) * scaleX;
-        const y = (event.clientY - rect.top) * scaleY;
+        const { x, y } = getCanvasCoords(event, canvas);
         
         log(`Click at: ${Math.round(x)}, ${Math.round(y)}`);
         
@@ -836,9 +842,7 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         
         // Get mouse position relative to canvas
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (event.clientX - rect.left) * (canvas.width / rect.width);
-        const mouseY = (event.clientY - rect.top) * (canvas.height / rect.height);
+        const { x: mouseX, y: mouseY } = getCanvasCoords(event, canvas);
         
         // Calculate zoom factor based on wheel delta
         const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
@@ -867,9 +871,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function startPanning(event) {
         // Get mouse position for token detection
-        const rect = canvas.getBoundingClientRect();
-        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+        const { x, y } = getCanvasCoords(event, canvas);
         
         // Check if we clicked on a token
         const tokenIndex = findTokenAtPosition(x, y);
@@ -905,9 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleMouseMove(event) {
         if (!mapImage) return;
         
-        const rect = canvas.getBoundingClientRect();
-        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+        const { x, y } = getCanvasCoords(event, canvas);
         
         // Handle panning
         if (isPanning) {
