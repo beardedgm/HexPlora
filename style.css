@@ -11,23 +11,24 @@ body {
     overflow: hidden; /* Prevent body scrollbars */
 }
 
-/* Header Section */
-.header {
+/* Sidebar Section */
+.sidebar {
     background-color: #2d3748; /* Slightly lighter dark */
     padding: 0.75rem 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
-    overflow: hidden;
-    max-height: 500px; /* Adjust as needed for content */
-    flex-shrink: 0; /* Prevent header from shrinking */
+    transition: transform 0.4s ease;
+    overflow-y: auto;
+    width: 300px;
+    flex-shrink: 0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
 }
 
-.header.collapsed {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    opacity: 0;
-    border-bottom: none; /* Hide border when collapsed */
+.sidebar.collapsed {
+    transform: translateX(-100%);
 }
 
 .title-bar {
@@ -205,14 +206,14 @@ input[type="range"] {
     cursor: pointer;
 }
 
-/* Header Toggle Button */
-.header-toggle {
+/* Sidebar Toggle Button */
+.sidebar-toggle {
     position: fixed;
     top: 5px;
-    right: 5px;
-    z-index: 1050; /* Above header */
+    left: 5px;
+    z-index: 1050; /* Above sidebar */
 }
-.header-toggle .btn {
+.sidebar-toggle .btn {
      padding: 0.3rem 0.6rem;
      font-size: 0.75rem;
 }
@@ -220,7 +221,7 @@ input[type="range"] {
 
 /* Map Container */
 .map-container {
-    flex: 1; /* Take remaining vertical space */
+    flex: 1; /* Take remaining horizontal space */
     overflow: hidden; /* Crucial for pan/zoom */
     position: relative; /* For loading overlay */
     background-color: #1a202c; /* Ensure bg color */
@@ -228,6 +229,12 @@ input[type="range"] {
     user-select: none; /* Prevent text selection */
     -webkit-user-select: none; /* Safari */
     touch-action: none; /* Prevent browser default touch actions like scroll/zoom */
+    margin-left: 300px; /* space for sidebar */
+    transition: margin-left 0.4s ease;
+}
+
+body.sidebar-collapsed .map-container {
+    margin-left: 0;
 }
 
 .map-container.panning {
