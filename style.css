@@ -20,6 +20,12 @@ body {
     overflow: hidden;
     max-height: 500px; /* Adjust as needed for content */
     flex-shrink: 0; /* Prevent header from shrinking */
+    position: fixed; /* Overlay the map instead of pushing it */
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .header.collapsed {
@@ -28,6 +34,7 @@ body {
     padding-bottom: 0;
     opacity: 0;
     border-bottom: none; /* Hide border when collapsed */
+    pointer-events: none; /* Allow clicks on the map */
 }
 
 .title-bar {
