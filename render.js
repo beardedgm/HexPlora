@@ -15,17 +15,30 @@ function hexToRgb(hex) {
 
 export function generateHexGrid() {
     state.hexes = [];
-    const hexWidth = state.hexSize * Math.sqrt(3);
-    const hexHeight = state.hexSize * 2;
+    let hexWidth, hexHeight;
+    if (state.orientation === 'pointy') {
+        hexWidth = state.hexSize * Math.sqrt(3);
+        hexHeight = state.hexSize * 2;
+    } else {
+        hexWidth = state.hexSize * 2;
+        hexHeight = state.hexSize * Math.sqrt(3);
+    }
     for (let row = 0; row < state.rowCount; row++) {
         for (let col = 0; col < state.columnCount; col++) {
-            const x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + state.offsetX;
-            const y = row * (hexHeight * 3 / 4) + state.offsetY;
+            let x, y;
+            if (state.orientation === 'pointy') {
+                x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + state.offsetX;
+                y = row * (hexHeight * 3 / 4) + state.offsetY;
+            } else {
+                x = col * (hexWidth * 3 / 4) + state.offsetX;
+                y = row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0) + state.offsetY;
+            }
             const hexId = `${col}-${row}`;
             const isRevealed = state.revealedHexes[hexId] === true;
             const vertices = [];
+            const startAngle = state.orientation === 'pointy' ? Math.PI / 2 : 0;
             for (let i = 0; i < 6; i++) {
-                const angle = (Math.PI / 3) * i + Math.PI / 2;
+                const angle = (Math.PI / 3) * i + startAngle;
                 const px = x + state.hexSize * Math.cos(angle);
                 const py = y + state.hexSize * Math.sin(angle);
                 vertices.push({ x: px, y: py });
