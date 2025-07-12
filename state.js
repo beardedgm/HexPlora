@@ -63,7 +63,12 @@ export function loadSavedState(ui) {
             }
         }
         if (data.tokens) {
-            state.tokens = data.tokens;
+            state.tokens = data.tokens.map(t => ({
+                x: t.x,
+                y: t.y,
+                color: t.color,
+                label: t.label || ''
+            }));
         }
     } catch (err) {
         console.error('Error loading saved state:', err);

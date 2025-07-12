@@ -154,7 +154,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Load tokens
                 if (state.tokens) {
-                    tokens = state.tokens;
+                    tokens = state.tokens.map(t => ({
+                        x: t.x,
+                        y: t.y,
+                        color: t.color,
+                        label: t.label || ''
+                    }));
                 }
                 
                 log('Loaded saved state');
@@ -683,6 +688,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.lineWidth = 1;
                 ctx.stroke();
             }
+
+            if (token.label) {
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                const textY = token.y + hexSize * 0.5;
+                ctx.strokeText(token.label, token.x, textY);
+                ctx.fillText(token.label, token.x, textY);
+            }
         }
         
         if (debugMode) {
@@ -1044,11 +1061,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const worldX = (x - panX) / zoomLevel;
         const worldY = (y - panY) / zoomLevel;
         
-        // Create the token - no label needed
+        const label = prompt('Enter a label for this token (optional):', '') || '';
         const newToken = {
             x: worldX,
             y: worldY,
-            color: tokenColor
+            color: tokenColor,
+            label: label
         };
         
         // Add to tokens array
@@ -1282,7 +1300,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Apply tokens if they exist
                 if (importData.tokens) {
-                    tokens = importData.tokens;
+                    tokens = importData.tokens.map(t => ({
+                        x: t.x,
+                        y: t.y,
+                        color: t.color,
+                        label: t.label || ''
+                    }));
                 }
                 
                 // If there's a map URL, load it
