@@ -163,36 +163,6 @@ input[type="range"] {
     padding-top: 0.75rem;
 }
 
-.btn {
-    padding: 0.5rem 0.8rem;
-    color: white;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-    text-align: center;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-    white-space: nowrap;
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Button Colors */
-.btn-primary { background-color: #4299e1; }
-.btn-primary:hover:not(:disabled) { background-color: #3182ce; }
-.btn-danger { background-color: #e53e3e; }
-.btn-danger:hover:not(:disabled) { background-color: #c53030; }
-.btn-success { background-color: #48bb78; }
-.btn-success:hover:not(:disabled) { background-color: #38a169; }
-.btn-warning { background-color: #ed8936; } /* For Hide mode */
-.btn-warning:hover:not(:disabled) { background-color: #dd6b20; }
-.btn-info { background-color: #805ad5; } /* Purple */
-.btn-info:hover:not(:disabled) { background-color: #6b46c1; }
-.btn-secondary { background-color: #718096; } /* Gray */
-.btn-secondary:hover:not(:disabled) { background-color: #4a5568; }
 
 
 /* File input styling */
@@ -219,7 +189,7 @@ input[type="range"] {
     right: 5px;
     z-index: 1050; /* Above header */
 }
-.header-toggle .btn {
+.header-toggle .button {
      padding: 0.3rem 0.6rem;
      font-size: 0.75rem;
 }
@@ -313,75 +283,6 @@ canvas {
   10%, 90% { opacity: 1; }
 }
 
-
-/* Modal Styles */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 1100; /* High z-index */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
-    backdrop-filter: blur(3px); /* Optional blur effect */
-    -webkit-backdrop-filter: blur(3px);
-}
-
-.modal-content {
-    background-color: #2d3748;
-    color: #e2e8f0;
-    margin: 10vh auto; /* Centered with margin top */
-    padding: 20px;
-    border-radius: 5px;
-    border: 1px solid #4a5568;
-    width: 90%;
-    max-width: 600px; /* Max width */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    position: relative; /* For close button positioning */
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #4a5568;
-    padding-bottom: 0.75rem;
-}
-
-.modal-header h2 {
-    margin: 0;
-    font-size: 1.25rem;
-}
-
-.close {
-    color: #a0aec0;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.close:hover {
-    color: white;
-}
-
-.modal-body {
-    margin-bottom: 1rem;
-}
-.modal-body p {
-    margin-top: 0;
-    font-size: 0.9rem;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    border-top: 1px solid #4a5568;
-    padding-top: 0.75rem;
-}
 
 textarea#export-json {
     width: 100%;

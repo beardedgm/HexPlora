@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Close export modal
         exportModalClose.addEventListener('click', function() {
-            exportModal.style.display = 'none';
+            exportModal.classList.remove('is-active');
         });
         
         // Copy JSON to clipboard
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
             if (event.target === exportModal) {
-                exportModal.style.display = 'none';
+                exportModal.classList.remove('is-active');
             }
         });
         
@@ -1143,15 +1143,15 @@ document.addEventListener('DOMContentLoaded', function() {
         isAddingToken = false;
         mapContainer.classList.remove('token-add-mode');
         addTokenBtn.textContent = 'Add Token';
-        addTokenBtn.classList.remove('btn-warning');
-        addTokenBtn.classList.add('btn-info');
+        addTokenBtn.classList.remove('is-warning');
+        addTokenBtn.classList.add('is-info');
 
         // Exit remove token mode
         isRemovingToken = false;
         mapContainer.classList.remove('token-remove-mode');
         removeTokenBtn.textContent = 'Remove Token';
-        removeTokenBtn.classList.remove('btn-danger');
-        removeTokenBtn.classList.add('btn-warning');
+        removeTokenBtn.classList.remove('is-danger');
+        removeTokenBtn.classList.add('is-warning');
         
         // Update display and redraw
         drawMap();
@@ -1206,15 +1206,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Enter add token mode
             mapContainer.classList.add('token-add-mode');
             addTokenBtn.textContent = 'Cancel';
-            addTokenBtn.classList.remove('btn-info');
-            addTokenBtn.classList.add('btn-warning');
+            addTokenBtn.classList.remove('is-info');
+            addTokenBtn.classList.add('is-warning');
             showStatus('Click on the map to place a token', 'info');
         } else {
             // Exit add token mode
             mapContainer.classList.remove('token-add-mode');
             addTokenBtn.textContent = 'Add Token';
-            addTokenBtn.classList.remove('btn-warning');
-            addTokenBtn.classList.add('btn-info');
+            addTokenBtn.classList.remove('is-warning');
+            addTokenBtn.classList.add('is-info');
         }
         
         log(`Token add mode ${isAddingToken ? 'enabled' : 'disabled'}`);
@@ -1236,14 +1236,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isRemovingToken) {
             mapContainer.classList.add('token-remove-mode');
             removeTokenBtn.textContent = 'Cancel';
-            removeTokenBtn.classList.remove('btn-warning');
-            removeTokenBtn.classList.add('btn-danger');
+            removeTokenBtn.classList.remove('is-warning');
+            removeTokenBtn.classList.add('is-danger');
             showStatus('Click a token to remove it', 'info');
         } else {
             mapContainer.classList.remove('token-remove-mode');
             removeTokenBtn.textContent = 'Remove Token';
-            removeTokenBtn.classList.remove('btn-danger');
-            removeTokenBtn.classList.add('btn-warning');
+            removeTokenBtn.classList.remove('is-danger');
+            removeTokenBtn.classList.add('is-warning');
         }
 
         log(`Token remove mode ${isRemovingToken ? 'enabled' : 'disabled'}`);
@@ -1271,8 +1271,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleMode() {
         revealMode = !revealMode;
         toggleModeBtn.textContent = `Mode: ${revealMode ? 'Reveal' : 'Hide'}`;
-        toggleModeBtn.classList.toggle('btn-primary', revealMode);
-        toggleModeBtn.classList.toggle('btn-warning', !revealMode);
+        toggleModeBtn.classList.toggle('is-primary', revealMode);
+        toggleModeBtn.classList.toggle('is-warning', !revealMode);
         
         // Update container class for cursor style
         mapContainer.classList.toggle('reveal-mode', revealMode);
@@ -1357,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', function() {
         exportJsonTextarea.value = jsonData;
         
         // Show the modal
-        exportModal.style.display = 'block';
+        exportModal.classList.add('is-active');
         
         log('Exported map state');
         showStatus('State exported', 'success');
