@@ -6,7 +6,7 @@ export function setupEventListeners(ui, handlers) {
         exportBtn,
         importFile,
         toggleModeBtn,
-        toggleSidebarBtn,
+        toggleHeaderBtn,
         resetViewBtn,
         addTokenBtn,
         clearTokensBtn,
@@ -42,7 +42,7 @@ export function setupEventListeners(ui, handlers) {
         drawMap,
         saveState,
         toggleMode,
-        toggleSidebar,
+        toggleHeader,
         resetMap,
         resetView,
         toggleAddTokenMode,
@@ -114,7 +114,7 @@ export function setupEventListeners(ui, handlers) {
     });
 
     toggleModeBtn.addEventListener('click', toggleMode);
-    toggleSidebarBtn.addEventListener('click', toggleSidebar);
+    toggleHeaderBtn.addEventListener('click', toggleHeader);
     resetBtn.addEventListener('click', resetMap);
     resetViewBtn.addEventListener('click', resetView);
     addTokenBtn.addEventListener('click', toggleAddTokenMode);
