@@ -13,11 +13,12 @@ HexPlora is a web-based viewer for tabletop-style maps. It overlays a hexagonal 
 - Zoom and pan support with mouse wheel and drag controls.
 - Import/export of the full map state (tokens with labels, revealed hexes, settings).
 - Toggleable header and optional debug view.
+- Responsive layout built with Bootstrap 5.
 
 ## Opening `index.html`
 
 1. Clone or download this repository.
-2. Open `index.html` in a modern web browser. If your browser blocks local file access when loading remote images, you can start a simple local server:
+2. Open `index.html` in a modern web browser. The page loads Bootstrap from a CDN, so internet access is required. If your browser blocks local file access when loading remote images, you can start a simple local server:
    ```bash
    python3 -m http.server
    ```
