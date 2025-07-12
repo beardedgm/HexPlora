@@ -11,7 +11,7 @@ HexPlora is a web-based viewer for tabletop-style maps. It overlays a hexagonal 
 - Add, move and clear tokens with selectable colors.
 - Zoom and pan support with mouse wheel and drag controls.
 - Import/export of the full map state (tokens, revealed hexes, settings).
-- Toggleable header and optional debug view.
+- Toggleable sidebar and optional debug view.
 
 ## Opening `index.html`
 
@@ -34,7 +34,7 @@ This project relies on standard HTML5 Canvas and modern JavaScript (ES6) feature
 
 ## Main Controls
 
-The top header contains controls for map settings and appearance:
+The left sidebar contains controls for map settings and appearance:
 
 - **Map URL** – enter an image URL and click **Load Map** to display it.
 - **Grid Settings** – configure hex size, grid offsets, column/row counts and map scale.
@@ -49,6 +49,6 @@ A row of buttons below the settings provides quick actions:
 - **Toggle Debug** – shows internal debug information.
 - **Export State** – opens a modal to copy or download the current state as JSON.
 - **Import State** – load a JSON file previously exported.
-- **Hide Header** – collapses the control panel to maximize map space.
+- **Hide Menu** – collapses the control panel to maximize map space.
 
 Status indicators at the bottom display the current zoom level and hovered hex. Pan with the middle or right mouse button and zoom with the scroll wheel.
