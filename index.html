@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="header" id="header-content">
+  <div class="title-bar">
+    <h1>Pointy-Top Hex Map Viewer</h1>
+    <div class="header-info">
+
+    </div>
+  </div>
+
+  <div class="map-url-container">
+    <label for="map-url">Map URL:</label>
+    <div class="url-input-group">
+      <input type="text" id="map-url" placeholder="Enter map image URL here or leave blank for default">
+      <button id="load-url-btn" class="btn btn-primary">Load Map</button>
+    </div>
+  </div>
+
+  <div class="controls-section">
+    <div class="controls" id="grid-settings-panel">
+      <h2>Grid Settings</h2>
+      <div class="control-group">
+        <label for="hex-size">Hex Size (px)</label>
+        <input type="number" id="hex-size" min="10" max="300" value="40">
+      </div>
+      <div class="control-group">
+        <label for="offset-x">Grid X Offset (px)</label>
+        <input type="number" id="offset-x" min="-1000" max="1000" value="0">
+      </div>
+      <div class="control-group">
+        <label for="offset-y">Grid Y Offset (px)</label>
+        <input type="number" id="offset-y" min="-1000" max="1000" value="0">
+      </div>
+      <div class="control-group">
+        <label for="columns">Columns</label>
+        <input type="number" id="columns" min="1" max="200" value="20">
+      </div>
+      <div class="control-group">
+        <label for="rows">Rows</label>
+        <input type="number" id="rows" min="1" max="200" value="15">
+      </div>
+      <div class="control-group">
+        <label for="map-scale">Map Scale (%)</label>
+        <input type="number" id="map-scale" min="10" max="500" value="100" title="Visual scale of the map image itself">
+      </div>
+    </div>
+
+    <div class="controls" id="appearance-settings-panel">
+      <h2>Appearance</h2>
+      <div class="control-group">
+        <label for="fog-color">Fog Color</label>
+        <input type="color" id="fog-color" value="#225522">
+      </div>
+      <div class="control-group">
+        <label for="fog-opacity">Fog Opacity</label>
+        <input type="range" id="fog-opacity" min="0" max="1" step="0.05" value="0.85">
+      </div>
+      <div class="control-group">
+        <label for="grid-color">Grid Line Color</label>
+        <input type="color" id="grid-color" value="#FFFFFF">
+      </div>
+      <div class="control-group">
+        <label for="grid-thickness">Grid Line Thickness</label>
+        <input type="range" id="grid-thickness" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="control-group">
+        <label for="token-color">Token Color</label>
+        <input type="color" id="token-color" value="#FF0000">
+      </div>
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button id="toggle-mode-btn" class="btn btn-primary">Mode: Reveal</button>
+    <button id="add-token-btn" class="btn btn-info">Add Token</button> <button id="reset-view-btn" class="btn btn-info">Reset View</button> <button id="reset-map-btn" class="btn btn-danger">Reset Fog</button>
+    <button id="clear-tokens-btn" class="btn btn-danger">Clear Tokens</button> <button id="debug-toggle" class="btn btn-secondary">Toggle Debug</button>
+    <button id="export-btn" class="btn btn-success">Export State</button>
+    <div class="file-input-container">
+      <button class="btn btn-success">Import State</button>
+      <input type="file" id="import-file" class="file-input" accept=".json">
+    </div>
+  </div>
+</div>
+
+<div class="header-toggle">
+  <button id="toggle-header-btn" class="btn btn-primary">Hide Header</button>
+</div>
+
+<div class="map-container" id="map-container">
+  <canvas id="map-canvas"></canvas>
+  <div class="loading" id="loading">Loading map...</div>
+</div>
+
+<div id="info-bar">
+  <span id="zoom-display">Zoom: 100%</span>
+  <span id="coord-display">Hex: ---</span>
+  <div id="status-indicator"></div>
+</div>
+
+<div id="debug-info"></div>
+
+<div id="export-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Export Map State</h2>
+      <span class="close" id="export-modal-close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>Copy the following JSON to save your map state:</p>
+      <textarea id="export-json" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button id="copy-json-btn" class="btn btn-primary">Copy to Clipboard</button>
+      <button id="download-json-btn" class="btn btn-success">Download as File</button>
+    </div>
+  </div>
+</div>
+<!-- partial -->
+  <script type="module" src="./script.js"></script>
+
+</body>
