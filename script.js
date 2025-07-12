@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const offsetYInput = document.getElementById('offset-y');
     const columnsInput = document.getElementById('columns');
     const rowsInput = document.getElementById('rows');
+    const orientationInput = document.getElementById('orientation');
     const loadUrlBtn = document.getElementById('load-url-btn');
     const mapUrlInput = document.getElementById('map-url');
     const mapScaleInput = document.getElementById('map-scale');
@@ -59,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let offsetY = 0;
     let columnCount = 20;
     let rowCount = 15;
+    let orientation = 'pointy';
     let mapScale = 100;
     let hexes = [];
     let revealedHexes = {};
@@ -135,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     gridColor = state.settings.gridColor || gridColor;
                     gridThickness = state.settings.gridThickness || gridThickness;
                     tokenColor = state.settings.tokenColor || tokenColor;
+                    orientation = state.settings.orientation || orientation;
                     
                     // Update input fields
                     hexSizeInput.value = hexSize;
@@ -150,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     gridColorInput.value = gridColor;
                     gridThicknessInput.value = gridThickness;
                     tokenColorInput.value = tokenColor;
+                    orientationInput.value = orientation;
                 }
                 
                 // Load tokens
@@ -205,6 +209,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         rowsInput.addEventListener('change', function() {
             rowCount = validateInput(this, 1, 200, 15);
+            generateHexGrid();
+            drawMap();
+            saveState();
+        });
+
+        orientationInput.addEventListener('change', function() {
+            orientation = this.value;
             generateHexGrid();
             drawMap();
             saveState();
@@ -531,24 +542,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function generateHexGrid() {
         hexes = [];
-        
-        // Calculate dimensions for pointy-top hexes
-        const hexWidth = hexSize * Math.sqrt(3);
-        const hexHeight = hexSize * 2;
-        
+
+        let hexWidth, hexHeight;
+        if (orientation === 'pointy') {
+            hexWidth = hexSize * Math.sqrt(3);
+            hexHeight = hexSize * 2;
+        } else {
+            hexWidth = hexSize * 2;
+            hexHeight = hexSize * Math.sqrt(3);
+        }
+
         for (let row = 0; row < rowCount; row++) {
             for (let col = 0; col < columnCount; col++) {
-                // Pointy-top grid: odd rows are offset horizontally
-                const x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + offsetX;
-                const y = row * (hexHeight * 3/4) + offsetY;
+                let x, y;
+                if (orientation === 'pointy') {
+                    // odd rows are offset horizontally
+                    x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + offsetX;
+                    y = row * (hexHeight * 3/4) + offsetY;
+                } else {
+                    // flat-top grid: odd columns are offset vertically
+                    x = col * (hexWidth * 3/4) + offsetX;
+                    y = row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0) + offsetY;
+                }
                 
                 const hexId = `${col}-${row}`;
                 const isRevealed = revealedHexes[hexId] === true;
                 
                 // Store the hex vertices for efficient hit testing
                 const vertices = [];
+                const startAngle = orientation === 'pointy' ? Math.PI / 2 : 0;
                 for (let i = 0; i < 6; i++) {
-                    const angle = (Math.PI / 3) * i + Math.PI / 2;
+                    const angle = (Math.PI / 3) * i + startAngle;
                     const px = x + hexSize * Math.cos(angle);
                     const py = y + hexSize * Math.sin(angle);
                     vertices.push({x: px, y: py});
@@ -1209,6 +1233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gridColorInput.value = gridColor;
         gridThicknessInput.value = gridThickness;
         tokenColorInput.value = tokenColor;
+        orientationInput.value = orientation;
     }
     
     // Export/Import functions
@@ -1224,6 +1249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 offsetY: offsetY,
                 columnCount: columnCount,
                 rowCount: rowCount,
+                orientation: orientation,
                 mapScale: mapScale,
                 fogColor: fogColor,
                 fogOpacity: fogOpacity,
@@ -1275,6 +1301,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     offsetY = importData.settings.offsetY || offsetY;
                     columnCount = importData.settings.columnCount || columnCount;
                     rowCount = importData.settings.rowCount || rowCount;
+                    orientation = importData.settings.orientation || orientation;
                     mapScale = importData.settings.mapScale || mapScale;
                     
                     // Import appearance settings
@@ -1283,7 +1310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     gridColor = importData.settings.gridColor || gridColor;
                     gridThickness = importData.settings.gridThickness || gridThickness;
                     tokenColor = importData.settings.tokenColor || tokenColor;
-                    
+
                     // Update input fields
                     updateInputFields();
                 }
@@ -1366,6 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 offsetY: offsetY,
                 columnCount: columnCount,
                 rowCount: rowCount,
+                orientation: orientation,
                 mapScale: mapScale,
                 fogColor: fogColor,
                 fogOpacity: fogOpacity,

@@ -6,6 +6,7 @@ export const state = {
     offsetY: 0,
     columnCount: 20,
     rowCount: 15,
+    orientation: 'pointy',
     mapScale: 100,
     hexes: [],
     revealedHexes: {},
@@ -41,6 +42,7 @@ export function loadSavedState(ui) {
             state.offsetY = data.settings.offsetY || state.offsetY;
             state.columnCount = data.settings.columnCount || state.columnCount;
             state.rowCount = data.settings.rowCount || state.rowCount;
+            state.orientation = data.settings.orientation || state.orientation;
             state.mapScale = data.settings.mapScale || state.mapScale;
             state.fogColor = data.settings.fogColor || state.fogColor;
             state.fogOpacity = data.settings.fogOpacity || state.fogOpacity;
@@ -54,6 +56,7 @@ export function loadSavedState(ui) {
                 ui.offsetYInput.value = state.offsetY;
                 ui.columnsInput.value = state.columnCount;
                 ui.rowsInput.value = state.rowCount;
+                ui.orientationInput.value = state.orientation;
                 ui.mapScaleInput.value = state.mapScale;
                 ui.fogColorInput.value = state.fogColor;
                 ui.fogOpacityInput.value = state.fogOpacity;
@@ -95,6 +98,7 @@ export function saveState(ui) {
             offsetY: state.offsetY,
             columnCount: state.columnCount,
             rowCount: state.rowCount,
+            orientation: state.orientation,
             mapScale: state.mapScale,
             fogColor: state.fogColor,
             fogOpacity: state.fogOpacity,

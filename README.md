@@ -4,7 +4,8 @@ HexPlora is a web-based viewer for tabletop-style maps. It overlays a hexagonal 
 
 ## Features
 
-- Load a map image from any URL and generate a pointy-top hex grid.
+- Load a map image from any URL and generate a hex grid with selectable
+  pointy-top or flat-top orientation.
 - Adjustable grid (hex size, offsets, column/row count and scale).
 - Customizable appearance for fog of war and grid lines.
 - Reveal/hide mode for managing fog of war directly on the canvas.
@@ -37,7 +38,8 @@ This project relies on standard HTML5 Canvas and modern JavaScript (ES6) feature
 The top header contains controls for map settings and appearance:
 
 - **Map URL** – enter an image URL and click **Load Map** to display it.
-- **Grid Settings** – configure hex size, grid offsets, column/row counts and map scale.
+- **Grid Settings** – configure hex size, grid offsets, column/row counts,
+  map scale and orientation.
 - **Appearance** – adjust fog color/opacity, grid color/thickness and token color.
 
 A row of buttons below the settings provides quick actions:

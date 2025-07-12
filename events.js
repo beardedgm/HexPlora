@@ -17,6 +17,7 @@ export function setupEventListeners(ui, handlers) {
         offsetYInput,
         columnsInput,
         rowsInput,
+        orientationInput,
         mapScaleInput,
         fogColorInput,
         fogOpacityInput,
@@ -78,6 +79,12 @@ export function setupEventListeners(ui, handlers) {
     });
     rowsInput.addEventListener('change', function() {
         handlers.state.rowCount = validateInput(this, 1, 200, 15);
+        generateHexGrid();
+        drawMap();
+        saveState();
+    });
+    orientationInput.addEventListener('change', function() {
+        handlers.state.orientation = this.value;
         generateHexGrid();
         drawMap();
         saveState();
