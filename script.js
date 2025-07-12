@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleHeaderBtn = document.getElementById('toggle-header-btn');
     const resetViewBtn = document.getElementById('reset-view-btn');
     const addTokenBtn = document.getElementById('add-token-btn');
+    const removeTokenBtn = document.getElementById('remove-token-btn');
     const clearTokensBtn = document.getElementById('clear-tokens-btn');
     
     // New display elements
@@ -83,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDraggingToken = false;
     let selectedTokenIndex = -1;
     let isAddingToken = false;
+    let isRemovingToken = false;
 
     function hexToRgb(hex) {
         hex = hex.replace('#', '');
@@ -253,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // New token buttons
         addTokenBtn.addEventListener('click', toggleAddTokenMode);
+        removeTokenBtn.addEventListener('click', toggleRemoveTokenMode);
         clearTokensBtn.addEventListener('click', clearTokens);
         
         loadUrlBtn.addEventListener('click', function() {
@@ -789,6 +792,21 @@ document.addEventListener('DOMContentLoaded', function() {
             addTokenAtPosition(x, y);
             return;
         }
+
+        // Token remove mode
+        if (isRemovingToken) {
+            const idx = findTokenAtPosition(x, y);
+            if (idx !== -1) {
+                tokens.splice(idx, 1);
+                selectedTokenIndex = -1;
+                saveState();
+                drawMap();
+                showStatus('Token removed', 'success');
+            } else {
+                showStatus('No token at that location', 'warning');
+            }
+            return;
+        }
         
         // Check if a token was clicked
         const tokenIndex = findTokenAtPosition(x, y);
@@ -964,7 +982,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Check for token hover to update cursor
         const tokenIndex = findTokenAtPosition(x, y);
-        if (tokenIndex !== -1 && !isAddingToken) {
+        if (tokenIndex !== -1 && !isAddingToken && !isRemovingToken) {
             mapContainer.classList.add('token-hover');
         } else {
             mapContainer.classList.remove('token-hover');
@@ -1005,6 +1023,13 @@ document.addEventListener('DOMContentLoaded', function() {
         addTokenBtn.textContent = 'Add Token';
         addTokenBtn.classList.remove('btn-warning');
         addTokenBtn.classList.add('btn-info');
+
+        // Exit remove token mode
+        isRemovingToken = false;
+        mapContainer.classList.remove('token-remove-mode');
+        removeTokenBtn.textContent = 'Remove Token';
+        removeTokenBtn.classList.remove('btn-danger');
+        removeTokenBtn.classList.add('btn-warning');
         
         // Update display and redraw
         drawMap();
@@ -1046,6 +1071,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle token add mode
     function toggleAddTokenMode() {
         isAddingToken = !isAddingToken;
+
+        // If switching to add mode, ensure remove mode is off
+        if (isAddingToken && isRemovingToken) {
+            toggleRemoveTokenMode(false);
+        }
         
         if (isAddingToken) {
             // Enter add token mode
@@ -1063,6 +1093,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         log(`Token add mode ${isAddingToken ? 'enabled' : 'disabled'}`);
+    }
+
+    // Toggle token remove mode
+    function toggleRemoveTokenMode(forceState) {
+        if (typeof forceState === 'boolean') {
+            isRemovingToken = forceState;
+        } else {
+            isRemovingToken = !isRemovingToken;
+        }
+
+        // Turning on remove mode should disable add mode
+        if (isRemovingToken && isAddingToken) {
+            toggleAddTokenMode();
+        }
+
+        if (isRemovingToken) {
+            mapContainer.classList.add('token-remove-mode');
+            removeTokenBtn.textContent = 'Cancel';
+            removeTokenBtn.classList.remove('btn-warning');
+            removeTokenBtn.classList.add('btn-danger');
+            showStatus('Click a token to remove it', 'info');
+        } else {
+            mapContainer.classList.remove('token-remove-mode');
+            removeTokenBtn.textContent = 'Remove Token';
+            removeTokenBtn.classList.remove('btn-danger');
+            removeTokenBtn.classList.add('btn-warning');
+        }
+
+        log(`Token remove mode ${isRemovingToken ? 'enabled' : 'disabled'}`);
     }
     
     // Clear all tokens
