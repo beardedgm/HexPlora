@@ -1,5 +1,18 @@
 import { state } from './state.js';
 
+function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+    }
+    const num = parseInt(hex, 16);
+    return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+    };
+}
+
 export function generateHexGrid() {
     state.hexes = [];
     const hexWidth = state.hexSize * Math.sqrt(3);
@@ -61,7 +74,8 @@ export function drawMap(ctx, canvas, ui) {
     ctx.drawImage(state.mapImage, 0, 0, state.mapImage.width, state.mapImage.height, 0, 0, scaledWidth, scaledHeight);
     ctx.strokeStyle = state.gridColor;
     ctx.lineWidth = state.gridThickness;
-    ctx.fillStyle = `${state.fogColor}${Math.round(state.fogOpacity * 255).toString(16).padStart(2, '0')}`;
+    const { r, g, b } = hexToRgb(state.fogColor);
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${state.fogOpacity})`;
     for (const hex of state.hexes) {
         if (!hex.revealed) {
             drawHex(ctx, hex);

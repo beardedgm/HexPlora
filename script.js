@@ -77,12 +77,25 @@ document.addEventListener('DOMContentLoaded', function() {
     let gridColor = '#FFFFFF';
     let gridThickness = 1;
     let tokenColor = '#FF0000';
-    
+
     // New state variables for tokens
     let tokens = [];
     let isDraggingToken = false;
     let selectedTokenIndex = -1;
     let isAddingToken = false;
+
+    function hexToRgb(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) {
+            hex = hex.split('').map(c => c + c).join('');
+        }
+        const num = parseInt(hex, 16);
+        return {
+            r: (num >> 16) & 255,
+            g: (num >> 8) & 255,
+            b: num & 255
+        };
+    }
     
     // Interaction mode - true for reveal, false for hide
     let revealMode = true;
@@ -623,7 +636,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Draw unrevealed hexes
         ctx.strokeStyle = gridColor;
         ctx.lineWidth = gridThickness;
-        ctx.fillStyle = `${fogColor}${Math.round(fogOpacity * 255).toString(16).padStart(2, '0')}`;
+        const { r, g, b } = hexToRgb(fogColor);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fogOpacity})`;
         
         for (const hex of hexes) {
             if (!hex.revealed) {
