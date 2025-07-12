@@ -1244,23 +1244,16 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             let state = {};
             const savedState = localStorage.getItem(STORAGE_KEY);
-            
+
             if (savedState) {
                 state = JSON.parse(savedState);
             }
-            
-            if (key === 'settings') {
-                state.settings = value;
-            } else if (key === 'revealedHexes') {
-                state.revealedHexes = value;
-            } else if (key === 'tokens') {
-                state.tokens = value;
-            } else if (key === 'view') {
-                state.view = value;
-            } else {
-                state[key] = value;
-            }
-            
+
+            // Generic assignment for most keys
+            state[key] = value;
+
+            // Special case handling can be added here if needed in the future
+
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             log(`Saved state updated: ${key}`);
         } catch (error) {
