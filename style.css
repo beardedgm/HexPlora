@@ -163,36 +163,6 @@ input[type="range"] {
     padding-top: 0.75rem;
 }
 
-.btn {
-    padding: 0.5rem 0.8rem;
-    color: white;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-    text-align: center;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-    white-space: nowrap;
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Button Colors */
-.btn-primary { background-color: #4299e1; }
-.btn-primary:hover:not(:disabled) { background-color: #3182ce; }
-.btn-danger { background-color: #e53e3e; }
-.btn-danger:hover:not(:disabled) { background-color: #c53030; }
-.btn-success { background-color: #48bb78; }
-.btn-success:hover:not(:disabled) { background-color: #38a169; }
-.btn-warning { background-color: #ed8936; } /* For Hide mode */
-.btn-warning:hover:not(:disabled) { background-color: #dd6b20; }
-.btn-info { background-color: #805ad5; } /* Purple */
-.btn-info:hover:not(:disabled) { background-color: #6b46c1; }
-.btn-secondary { background-color: #718096; } /* Gray */
-.btn-secondary:hover:not(:disabled) { background-color: #4a5568; }
 
 
 /* File input styling */
