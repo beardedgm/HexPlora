@@ -169,6 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInputFields();
         setupEventListeners();
         loadMap();
+        // Ensure token icons render properly once fonts are loaded
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => requestRedraw());
+        }
         updateUndoRedoButtons();
         log('App initialized');
     }
@@ -896,11 +900,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (token.icon) {
-                tokenCtx.font = `${hexSize * 0.8}px \"Material Symbols Outlined\"`;
+                const iconSize = hexSize * 0.72; // slightly smaller than the circle
+                const iconYOffset = hexSize * 0.05; // nudge for better centering
+                tokenCtx.font = `${iconSize}px \"Material Symbols Outlined\"`;
                 tokenCtx.textAlign = 'center';
                 tokenCtx.textBaseline = 'middle';
                 tokenCtx.fillStyle = 'white';
-                tokenCtx.fillText(token.icon, token.x, token.y);
+                tokenCtx.fillText(token.icon, token.x, token.y + iconYOffset);
             }
 
             if (token.label) {
