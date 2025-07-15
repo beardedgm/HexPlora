@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const tokenIconSelect = document.getElementById('token-icon-select');
     const tokenLabelConfirm = document.getElementById('token-label-confirm');
     const tokenLabelCancel = document.getElementById('token-label-cancel');
+    const tokenNotesInput = document.getElementById('token-notes-input');
+    const tokenTooltip = document.getElementById('token-tooltip');
     
     // Debug mode flag
     let debugMode = false;
@@ -98,6 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let isAddingToken = false;
     let isRemovingToken = false;
     let pendingTokenPos = null;
+    let editingTokenIndex = -1;
+    let hoveredTokenIndex = -1;
+    let tooltipTimer = null;
 
     // History stacks for undo/redo
     let undoStack = [];
@@ -179,7 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         y: t.y,
                         color: t.color,
                         label: t.label || '',
-                        icon: t.icon || ''
+                        icon: t.icon || '',
+                        notes: t.notes || ''
                     }));
                 }
                 
@@ -332,7 +338,13 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.addEventListener('mousedown', startPanning);
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('mouseup', stopPanning);
-        canvas.addEventListener('mouseleave', stopPanning);
+        canvas.addEventListener('mouseleave', function(e) {
+            stopPanning(e);
+            clearTimeout(tooltipTimer);
+            hideTokenTooltip();
+            hoveredTokenIndex = -1;
+        });
+        canvas.addEventListener('dblclick', handleCanvasDoubleClick);
         
         // Prevent context menu on right-click but allow right-click event to be handled
         canvas.addEventListener('contextmenu', function(e) {
@@ -821,6 +833,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function hideTokenTooltip() {
+        if (tokenTooltip) {
+            tokenTooltip.style.display = 'none';
+        }
+    }
+
     function snapshotState() {
         return {
             revealedHexes: JSON.parse(JSON.stringify(revealedHexes)),
@@ -932,7 +950,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleCanvasClick(event) {
         if (!mapImage) return;
-        
+
+        clearTimeout(tooltipTimer);
+        hideTokenTooltip();
+
         // Calculate click position in canvas coordinates
         const { x, y } = getCanvasCoords(event, canvas);
         
@@ -1022,6 +1043,26 @@ document.addEventListener('DOMContentLoaded', function() {
             log(`No ${revealMode ? 'unrevealed' : 'revealed'} hex found at click location`);
         }
     }
+
+    function handleCanvasDoubleClick(event) {
+        if (!mapImage || isAddingToken || isRemovingToken) return;
+
+        clearTimeout(tooltipTimer);
+        hideTokenTooltip();
+
+        const { x, y } = getCanvasCoords(event, canvas);
+        const idx = findTokenAtPosition(x, y);
+        if (idx !== -1) {
+            editingTokenIndex = idx;
+            const token = tokens[idx];
+            tokenLabelInput.value = token.label || '';
+            if (tokenIconSelect) tokenIconSelect.value = token.icon || '';
+            tokenColorInput.value = token.color || tokenColor;
+            if (tokenNotesInput) tokenNotesInput.value = token.notes || '';
+            tokenLabelModal.style.display = 'block';
+            tokenLabelInput.focus();
+        }
+    }
     
     function handleZoom(event) {
         event.preventDefault();
@@ -1064,6 +1105,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // MODIFIED: Allow panning with middle mouse button or right mouse button
         // Only start panning if we're not in token adding mode and not clicking on a token
         if (event.button === 1 || (event.button === 2)) {
+            clearTimeout(tooltipTimer);
+            hideTokenTooltip();
             isPanning = true;
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
@@ -1079,7 +1122,10 @@ document.addEventListener('DOMContentLoaded', function() {
             mapContainer.classList.remove('panning');
             log('Stopped panning');
         }
-        
+
+        clearTimeout(tooltipTimer);
+        hideTokenTooltip();
+
         // Also stop token dragging if it was happening
         if (isDraggingToken) {
             isDraggingToken = false;
@@ -1134,8 +1180,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         updateCoordDisplay(hoveredHex);
         
-        // Check for token hover to update cursor
+        // Check for token hover to update cursor and tooltip
         const tokenIndex = findTokenAtPosition(x, y);
+
+        if (tokenIndex !== hoveredTokenIndex) {
+            hoveredTokenIndex = tokenIndex;
+            clearTimeout(tooltipTimer);
+            hideTokenTooltip();
+
+            if (
+                tokenIndex !== -1 &&
+                !isAddingToken &&
+                !isRemovingToken &&
+                tokens[tokenIndex].notes
+            ) {
+                tooltipTimer = setTimeout(() => {
+                    const token = tokens[tokenIndex];
+                    const rect = mapContainer.getBoundingClientRect();
+                    const sx = token.x * zoomLevel + panX + rect.left;
+                    const sy = token.y * zoomLevel + panY + rect.top;
+                    tokenTooltip.textContent = token.notes;
+                    tokenTooltip.style.left = `${sx + 10}px`;
+                    tokenTooltip.style.top = `${sy + 10}px`;
+                    tokenTooltip.style.display = 'block';
+                }, 1000);
+            }
+        } else if (tokenTooltip.style.display === 'block' && tokenIndex !== -1) {
+            const token = tokens[tokenIndex];
+            const rect = mapContainer.getBoundingClientRect();
+            tokenTooltip.style.left = `${token.x * zoomLevel + panX + rect.left + 10}px`;
+            tokenTooltip.style.top = `${token.y * zoomLevel + panY + rect.top + 10}px`;
+        }
+
         if (tokenIndex !== -1 && !isAddingToken && !isRemovingToken) {
             mapContainer.classList.add('token-hover');
         } else {
@@ -1204,41 +1280,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tokenLabelInput.value = '';
         if (tokenIconSelect) tokenIconSelect.value = '';
+        tokenColorInput.value = tokenColor;
+        if (tokenNotesInput) tokenNotesInput.value = '';
         tokenLabelModal.style.display = 'block';
         tokenLabelInput.focus();
     }
 
     function confirmTokenLabel() {
-        if (!pendingTokenPos) return;
-
         const label = tokenLabelInput.value.trim();
         const icon = tokenIconSelect ? tokenIconSelect.value : '';
-        const newToken = {
-            x: pendingTokenPos.x,
-            y: pendingTokenPos.y,
-            color: tokenColor,
-            label: label,
-            icon: icon
-        };
+        const color = tokenColorInput.value || tokenColor;
+        const notes = tokenNotesInput ? tokenNotesInput.value.trim() : '';
 
-        tokens.push(newToken);
-        selectedTokenIndex = tokens.length - 1;
+        tokenColor = color; // update default
 
-        pendingTokenPos = null;
-        toggleAddTokenMode();
+        if (editingTokenIndex !== -1) {
+            const token = tokens[editingTokenIndex];
+            token.label = label;
+            token.icon = icon;
+            token.color = color;
+            token.notes = notes;
+            selectedTokenIndex = editingTokenIndex;
+            editingTokenIndex = -1;
+        } else {
+            if (!pendingTokenPos) return;
+            const newToken = {
+                x: pendingTokenPos.x,
+                y: pendingTokenPos.y,
+                color: color,
+                label: label,
+                icon: icon,
+                notes: notes
+            };
+            tokens.push(newToken);
+            selectedTokenIndex = tokens.length - 1;
+            pendingTokenPos = null;
+            toggleAddTokenMode();
+        }
+
         closeTokenLabelModal();
 
         saveState();
         drawMap();
         pushHistory();
 
-        log(`Added token at ${Math.round(newToken.x)}, ${Math.round(newToken.y)}`);
-        showStatus(`Token added (click and drag to move)`, 'success');
+        const msg = editingTokenIndex === -1 ? 'Token added (click and drag to move)' : 'Token updated';
+        showStatus(msg, 'success');
     }
 
     function closeTokenLabelModal() {
         tokenLabelModal.style.display = 'none';
         pendingTokenPos = null;
+        editingTokenIndex = -1;
+        clearTimeout(tooltipTimer);
+        hideTokenTooltip();
     }
     
     // Toggle token add mode
@@ -1374,7 +1469,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleExport() {
         // Create the export object
         const exportData = {
-            version: 2, // Increment version for new features
+            version: 3, // Increment version for new features
             timestamp: new Date().toISOString(),
             mapUrl: mapUrlInput.value,
             settings: {
@@ -1466,7 +1561,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         y: t.y,
                         color: t.color,
                         label: t.label || '',
-                        icon: t.icon || ''
+                        icon: t.icon || '',
+                        notes: t.notes || ''
                     }));
                 }
                 

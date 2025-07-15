@@ -82,10 +82,6 @@
         <label for="grid-thickness">Grid Line Thickness</label>
         <input type="range" class="form-range" id="grid-thickness" min="0.1" max="5" step="0.1" value="1">
       </div>
-      <div class="control-group">
-        <label for="token-color">Token Color</label>
-        <input type="color" class="form-control form-control-color form-control-sm" id="token-color" value="#FF0000">
-      </div>
     </div>
   </div>
 
@@ -112,6 +108,7 @@
 <div class="map-container" id="map-container">
   <canvas id="map-canvas"></canvas>
   <div class="loading" id="loading">Loading map...</div>
+  <div id="token-tooltip" class="token-tooltip"></div>
 </div>
 
 <div id="info-bar">
@@ -155,7 +152,10 @@
         <option value="person">person</option>
         <option value="location_on">location_on</option>
       </select>
-      <input type="text" id="token-label-input" class="form-control" placeholder="Enter label (optional)">
+      <input type="text" id="token-label-input" class="form-control mb-2" placeholder="Enter label (optional)">
+      <label for="token-color" class="form-label">Token Color</label>
+      <input type="color" class="form-control form-control-color form-control-sm mb-2" id="token-color" value="#FF0000">
+      <textarea id="token-notes-input" class="form-control" rows="3" placeholder="Enter notes (optional)"></textarea>
     </div>
     <div class="modal-footer">
       <button id="token-label-confirm" class="btn btn-primary btn-sm">Add Token</button>

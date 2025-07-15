@@ -9,9 +9,10 @@ HexPlora is a web-based viewer for tabletop-style maps. It overlays a hexagonal 
 - Adjustable grid (hex size, offsets, column/row count and scale).
 - Customizable appearance for fog of war and grid lines.
 - Reveal/hide mode for managing fog of war directly on the canvas.
-- Add, move and clear tokens with selectable colors and optional labels.
+- Add, move and clear tokens with customizable colors, labels and notes.
+- Hover a token for a second to view its notes in a tooltip.
 - Zoom and pan support with mouse wheel and drag controls.
-- Import/export of the full map state (tokens with labels, revealed hexes, settings).
+- Import/export of the full map state (tokens with labels, notes, revealed hexes, settings).
 - Toggleable header and optional debug view.
 - Responsive layout built with Bootstrap 5.
 
@@ -41,12 +42,13 @@ The top header contains controls for map settings and appearance:
 - **Map URL** – enter an image URL and click **Load Map** to display it.
 - **Grid Settings** – configure hex size, grid offsets, column/row counts,
   map scale and orientation.
-- **Appearance** – adjust fog color/opacity, grid color/thickness and token color.
+- **Appearance** – adjust fog color/opacity and grid line styling.
 
 A row of buttons below the settings provides quick actions:
 
 - **Mode: Reveal/Hide** – switches between revealing or hiding hexes.
- - **Add Token** – enables token placement. You will be prompted for a label when placing a token. Existing tokens can be dragged or cleared.
+- **Add Token** – enables token placement. A modal lets you set the token label, color, icon and optional notes. Existing tokens can be dragged or cleared.
+- Hovering a token for a second displays its notes in a tooltip.
 - **Reset View** – resets zoom and panning. **Reset Fog** hides all revealed hexes.
 - **Clear Tokens** – removes all tokens from the map.
 - **Toggle Debug** – shows internal debug information.
