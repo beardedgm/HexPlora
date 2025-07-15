@@ -1,4 +1,3 @@
-import { state } from './state.js';
 import { SpatialHashGrid } from './spatialIndex.js';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -142,42 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const debouncedSaveState = debounce(saveState, 300);
     const debouncedRequestRedraw = debounce(requestRedraw, 50);
 
-    function syncStore() {
-        Object.assign(state, {
-            hexSize,
-            offsetX,
-            offsetY,
-            columnCount,
-            rowCount,
-            orientation,
-            mapScale,
-            hexes,
-            revealedHexes,
-            mapImage,
-            zoomLevel,
-            panX,
-            panY,
-            isPanning,
-            lastMouseX,
-            lastMouseY,
-            fogColor,
-            fogOpacity,
-            gridColor,
-            gridThickness,
-            tokenColor,
-            tokens,
-            isDraggingToken,
-            selectedTokenIndex,
-            isAddingToken,
-            isRemovingToken,
-            pendingTokenPos,
-            editingTokenIndex,
-            undoStack,
-            redoStack,
-            needsRedraw,
-            revealMode
-        });
-    }
 
     function hexToRgb(hex) {
         hex = hex.replace('#', '');
@@ -203,7 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInputFields();
         setupEventListeners();
         loadMap();
-        syncStore();
         updateUndoRedoButtons();
         log('App initialized');
     }
@@ -212,25 +174,25 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const savedState = localStorage.getItem(STORAGE_KEY);
             if (savedState) {
-                const state = JSON.parse(savedState);
+                const parsedState = JSON.parse(savedState);
                 
-                revealedHexes = state.revealedHexes || {};
+                revealedHexes = parsedState.revealedHexes || {};
                 
-                if (state.settings) {
-                    hexSize = state.settings.hexSize || hexSize;
-                    offsetX = state.settings.offsetX || offsetX;
-                    offsetY = state.settings.offsetY || offsetY;
-                    columnCount = state.settings.columnCount || columnCount;
-                    rowCount = state.settings.rowCount || rowCount;
-                    mapScale = state.settings.mapScale || mapScale;
+                if (parsedState.settings) {
+                    hexSize = parsedState.settings.hexSize || hexSize;
+                    offsetX = parsedState.settings.offsetX || offsetX;
+                    offsetY = parsedState.settings.offsetY || offsetY;
+                    columnCount = parsedState.settings.columnCount || columnCount;
+                    rowCount = parsedState.settings.rowCount || rowCount;
+                    mapScale = parsedState.settings.mapScale || mapScale;
                     
                     // Load new appearance settings
-                    fogColor = state.settings.fogColor || fogColor;
-                    fogOpacity = state.settings.fogOpacity || fogOpacity;
-                    gridColor = state.settings.gridColor || gridColor;
-                    gridThickness = state.settings.gridThickness || gridThickness;
-                    tokenColor = state.settings.tokenColor || tokenColor;
-                    orientation = state.settings.orientation || orientation;
+                    fogColor = parsedState.settings.fogColor || fogColor;
+                    fogOpacity = parsedState.settings.fogOpacity || fogOpacity;
+                    gridColor = parsedState.settings.gridColor || gridColor;
+                    gridThickness = parsedState.settings.gridThickness || gridThickness;
+                    tokenColor = parsedState.settings.tokenColor || tokenColor;
+                    orientation = parsedState.settings.orientation || orientation;
                     
                     // Update input fields
                     hexSizeInput.value = hexSize;
@@ -250,8 +212,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Load tokens
-                if (state.tokens) {
-                    tokens = state.tokens.map(t => ({
+                if (parsedState.tokens) {
+                    tokens = parsedState.tokens.map(t => ({
                         x: t.x,
                         y: t.y,
                         color: t.color,
@@ -262,7 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     rebuildTokenIndex();
                 }
                 
-                syncStore();
                 log('Loaded saved state');
             }
         } catch (error) {
@@ -587,9 +548,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const savedState = localStorage.getItem(STORAGE_KEY);
             if (savedState) {
                 try {
-                    const state = JSON.parse(savedState);
-                    if (state.mapUrl && state.mapUrl.trim() !== '') {
-                        mapUrl = state.mapUrl;
+                    const stored = JSON.parse(savedState);
+                    if (stored.mapUrl && stored.mapUrl.trim() !== '') {
+                        mapUrl = stored.mapUrl;
                     } else {
                         mapUrl = DEFAULT_MAP;
                     }
@@ -975,13 +936,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         saveState();
-        syncStore();
         requestRedraw();
     }
 
     function pushHistory() {
         undoStack.push(snapshotState());
-        syncStore();
         if (undoStack.length > 100) undoStack.shift();
         redoStack = [];
         updateUndoRedoButtons();
@@ -998,9 +957,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function redo() {
         if (redoStack.length === 0) return;
-        const state = redoStack.pop();
-        undoStack.push(state);
-        restoreSnapshot(state);
+        const redoState = redoStack.pop();
+        undoStack.push(redoState);
+        restoreSnapshot(redoState);
         updateUndoRedoButtons();
     }
 
@@ -1695,19 +1654,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateSavedState(key, value) {
         try {
-            let state = {};
+            let storedState = {};
             const savedState = localStorage.getItem(STORAGE_KEY);
 
             if (savedState) {
-                state = JSON.parse(savedState);
+                storedState = JSON.parse(savedState);
             }
 
             // Generic assignment for most keys
-            state[key] = value;
+            storedState[key] = value;
 
-            // Special case handling can be added here if needed in the future
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(storedState));
             log(`Saved state updated: ${key}`);
         } catch (error) {
             console.error('Error updating saved state:', error);
@@ -1716,7 +1673,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function saveState() {
-        syncStore();
         try {
             const settings = {
                 hexSize: hexSize,
