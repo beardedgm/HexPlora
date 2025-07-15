@@ -1,3 +1,5 @@
+import { state } from './state.js';
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const mapCanvas = document.getElementById('map-layer');
@@ -121,6 +123,43 @@ document.addEventListener('DOMContentLoaded', function() {
     // Render loop state
     let needsRedraw = false;
 
+    function syncStore() {
+        Object.assign(state, {
+            hexSize,
+            offsetX,
+            offsetY,
+            columnCount,
+            rowCount,
+            orientation,
+            mapScale,
+            hexes,
+            revealedHexes,
+            mapImage,
+            zoomLevel,
+            panX,
+            panY,
+            isPanning,
+            lastMouseX,
+            lastMouseY,
+            fogColor,
+            fogOpacity,
+            gridColor,
+            gridThickness,
+            tokenColor,
+            tokens,
+            isDraggingToken,
+            selectedTokenIndex,
+            isAddingToken,
+            isRemovingToken,
+            pendingTokenPos,
+            editingTokenIndex,
+            undoStack,
+            redoStack,
+            needsRedraw,
+            revealMode
+        });
+    }
+
     function hexToRgb(hex) {
         hex = hex.replace('#', '');
         if (hex.length === 3) {
@@ -145,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateInputFields();
         setupEventListeners();
         loadMap();
+        syncStore();
         updateUndoRedoButtons();
         log('App initialized');
     }
@@ -202,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }));
                 }
                 
+                syncStore();
                 log('Loaded saved state');
             }
         } catch (error) {
@@ -889,11 +930,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         saveState();
+        syncStore();
         requestRedraw();
     }
 
     function pushHistory() {
         undoStack.push(snapshotState());
+        syncStore();
         if (undoStack.length > 100) undoStack.shift();
         redoStack = [];
         updateUndoRedoButtons();
@@ -1631,6 +1674,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function saveState() {
+        syncStore();
         try {
             const settings = {
                 hexSize: hexSize,
