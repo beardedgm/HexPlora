@@ -9,7 +9,13 @@ export class SpatialHashGrid {
     }
 
     _key(cx, cy) {
-        return `${cx},${cy}`;
+        // Encode coordinates using a Cantor pairing on unsigned values to
+        // avoid any chance of collisions with negative numbers.
+        const encode = (n) => (n >= 0 ? 2 * n : -2 * n - 1);
+        const x = encode(cx);
+        const y = encode(cy);
+        const pair = ((x + y) * (x + y + 1)) / 2 + y;
+        return pair.toString();
     }
 
     _cellsForBounds(bounds) {
