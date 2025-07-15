@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tokenLabelModal = document.getElementById('token-label-modal');
     const tokenLabelModalClose = document.getElementById('token-label-modal-close');
     const tokenLabelInput = document.getElementById('token-label-input');
+    const tokenIconSelect = document.getElementById('token-icon-select');
     const tokenLabelConfirm = document.getElementById('token-label-confirm');
     const tokenLabelCancel = document.getElementById('token-label-cancel');
     
@@ -177,7 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         x: t.x,
                         y: t.y,
                         color: t.color,
-                        label: t.label || ''
+                        label: t.label || '',
+                        icon: t.icon || ''
                     }));
                 }
                 
@@ -759,6 +761,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.stroke();
             }
 
+            if (token.icon) {
+                ctx.font = `${hexSize * 0.8}px \"Material Symbols Outlined\"`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'white';
+                ctx.fillText(token.icon, token.x, token.y);
+            }
+
             if (token.label) {
                 ctx.font = '12px Arial';
                 ctx.textAlign = 'center';
@@ -1193,6 +1203,7 @@ document.addEventListener('DOMContentLoaded', function() {
         pendingTokenPos = { x: worldX, y: worldY };
 
         tokenLabelInput.value = '';
+        if (tokenIconSelect) tokenIconSelect.value = '';
         tokenLabelModal.style.display = 'block';
         tokenLabelInput.focus();
     }
@@ -1201,11 +1212,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!pendingTokenPos) return;
 
         const label = tokenLabelInput.value.trim();
+        const icon = tokenIconSelect ? tokenIconSelect.value : '';
         const newToken = {
             x: pendingTokenPos.x,
             y: pendingTokenPos.y,
             color: tokenColor,
-            label: label
+            label: label,
+            icon: icon
         };
 
         tokens.push(newToken);
@@ -1452,7 +1465,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         x: t.x,
                         y: t.y,
                         color: t.color,
-                        label: t.label || ''
+                        label: t.label || '',
+                        icon: t.icon || ''
                     }));
                 }
                 
