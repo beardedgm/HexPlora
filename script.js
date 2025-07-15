@@ -996,34 +996,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function isPointInHex(px, py, hex) {
-        // Adjust point coordinates for zoom and pan
-        const adjustedX = (px - panX) / zoomLevel;
-        const adjustedY = (py - panY) / zoomLevel;
-        
-        // Use point-in-polygon algorithm for accurate detection
+        // `px` and `py` should already be in world coordinates. This function
+        // simply checks if the point lies inside the hex using a
+        // ray-casting algorithm.
+
         const vertices = hex.vertices;
         let inside = false;
-        
-        // Ray-casting algorithm
+
         for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
             const xi = vertices[i].x, yi = vertices[i].y;
             const xj = vertices[j].x, yj = vertices[j].y;
-            
-            const intersect = ((yi > adjustedY) !== (yj > adjustedY)) && 
-                (adjustedX < (xj - xi) * (adjustedY - yi) / (yj - yi) + xi);
-            
+
+            const intersect = ((yi > py) !== (yj > py)) &&
+                (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+
             if (intersect) inside = !inside;
         }
-        
+
         return inside;
     }
 
     function findHexAtPosition(x, y) {
+        // Convert the screen coordinates to world coordinates first
         const worldX = (x - panX) / zoomLevel;
         const worldY = (y - panY) / zoomLevel;
+
         const candidates = hexIndex.queryPoint(worldX, worldY);
         for (const hex of candidates) {
-            if (isPointInHex(x, y, hex)) {
+            if (isPointInHex(worldX, worldY, hex)) {
                 return hex;
             }
         }
