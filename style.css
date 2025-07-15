@@ -405,3 +405,10 @@ textarea#export-json {
         flex-basis: 100%;
     }
 }
+
+.material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+    font-size: inherit;
+    line-height: 1;
+}
