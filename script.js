@@ -1279,6 +1279,10 @@ document.addEventListener('DOMContentLoaded', function() {
             mapContainer.classList.add('token-hover');
 
             if (tokenIndex !== hoveredTokenIndex) {
+                if (tooltipTimer) {
+                    clearTimeout(tooltipTimer);
+                    tooltipTimer = null;
+                }
                 hideTooltip();
                 hoveredTokenIndex = tokenIndex;
                 if (tokens[tokenIndex].notes) {
@@ -1289,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             tokenTooltip.style.left = `${event.clientX - rect.left + 15}px`;
                             tokenTooltip.style.top = `${event.clientY - rect.top + 15}px`;
                             tokenTooltip.style.display = 'block';
+                            tooltipTimer = null;
                         }
                     }, 1000);
                 }
