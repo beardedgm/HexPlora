@@ -31,6 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportJsonTextarea = document.getElementById('export-json');
     const copyJsonBtn = document.getElementById('copy-json-btn');
     const downloadJsonBtn = document.getElementById('download-json-btn');
+
+    // Token label modal elements
+    const tokenLabelModal = document.getElementById('token-label-modal');
+    const tokenLabelModalClose = document.getElementById('token-label-modal-close');
+    const tokenLabelInput = document.getElementById('token-label-input');
+    const tokenLabelConfirm = document.getElementById('token-label-confirm');
+    const tokenLabelCancel = document.getElementById('token-label-cancel');
     
     // Debug mode flag
     let debugMode = false;
@@ -89,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedTokenIndex = -1;
     let isAddingToken = false;
     let isRemovingToken = false;
+    let pendingTokenPos = null;
 
     // History stacks for undo/redo
     let undoStack = [];
@@ -347,6 +355,18 @@ document.addEventListener('DOMContentLoaded', function() {
         exportModalClose.addEventListener('click', function() {
             exportModal.style.display = 'none';
         });
+
+        // Token label modal events
+        tokenLabelModalClose.addEventListener('click', closeTokenLabelModal);
+        tokenLabelCancel.addEventListener('click', closeTokenLabelModal);
+        tokenLabelConfirm.addEventListener('click', confirmTokenLabel);
+
+        tokenLabelInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                confirmTokenLabel();
+            }
+        });
         
         // Copy JSON to clipboard
         copyJsonBtn.addEventListener('click', function() {
@@ -374,6 +394,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('click', function(event) {
             if (event.target === exportModal) {
                 exportModal.style.display = 'none';
+            }
+            if (event.target === tokenLabelModal) {
+                closeTokenLabelModal();
             }
         });
         
@@ -1166,31 +1189,43 @@ document.addEventListener('DOMContentLoaded', function() {
         // Adjust position for zoom and pan
         const worldX = (x - panX) / zoomLevel;
         const worldY = (y - panY) / zoomLevel;
-        
-        const label = prompt('Enter a label for this token (optional):', '') || '';
+
+        pendingTokenPos = { x: worldX, y: worldY };
+
+        tokenLabelInput.value = '';
+        tokenLabelModal.style.display = 'block';
+        tokenLabelInput.focus();
+    }
+
+    function confirmTokenLabel() {
+        if (!pendingTokenPos) return;
+
+        const label = tokenLabelInput.value.trim();
         const newToken = {
-            x: worldX,
-            y: worldY,
+            x: pendingTokenPos.x,
+            y: pendingTokenPos.y,
             color: tokenColor,
             label: label
         };
-        
-        // Add to tokens array
+
         tokens.push(newToken);
-        
-        // Select the new token
         selectedTokenIndex = tokens.length - 1;
-        
-        // Exit add token mode
+
+        pendingTokenPos = null;
         toggleAddTokenMode();
-        
-        // Save state and redraw
+        closeTokenLabelModal();
+
         saveState();
         drawMap();
         pushHistory();
 
-        log(`Added token at ${Math.round(worldX)}, ${Math.round(worldY)}`);
+        log(`Added token at ${Math.round(newToken.x)}, ${Math.round(newToken.y)}`);
         showStatus(`Token added (click and drag to move)`, 'success');
+    }
+
+    function closeTokenLabelModal() {
+        tokenLabelModal.style.display = 'none';
+        pendingTokenPos = null;
     }
     
     // Toggle token add mode
