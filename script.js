@@ -372,11 +372,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mouse wheel for zoom
         canvas.addEventListener('wheel', handleZoom);
         
-        // Mouse events for panning
+        // Mouse events for panning and dragging
         canvas.addEventListener('mousedown', startPanning);
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('mouseup', stopPanning);
         canvas.addEventListener('mouseleave', stopPanning);
+        // Ensure cleanup even if the mouse leaves the canvas or page
+        mapContainer.addEventListener('mouseleave', stopPanning);
+        document.addEventListener('mouseup', stopPanning);
+        document.addEventListener('mouseleave', stopPanning);
         canvas.addEventListener('dblclick', handleCanvasDoubleClick);
         
         // Prevent context menu on right-click but allow right-click event to be handled
