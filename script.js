@@ -123,6 +123,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Render loop state
     let needsRedraw = false;
 
+    // Utility: debounce execution of a function
+    function debounce(fn, delay = 100) {
+        let timerId;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timerId);
+            timerId = setTimeout(() => fn.apply(context, args), delay);
+        };
+    }
+
+    // Debounced wrappers for expensive operations
+    const debouncedSaveState = debounce(saveState, 300);
+    const debouncedRequestRedraw = debounce(requestRedraw, 50);
+
     function syncStore() {
         Object.assign(state, {
             hexSize,
@@ -313,8 +327,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fogOpacityInput.addEventListener('input', function() {
             fogOpacity = parseFloat(this.value);
-            requestRedraw();
-            saveState();
+            debouncedRequestRedraw();
+            debouncedSaveState();
         });
         
         gridColorInput.addEventListener('change', function() {
@@ -325,8 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         gridThicknessInput.addEventListener('input', function() {
             gridThickness = parseFloat(this.value);
-            requestRedraw();
-            saveState();
+            debouncedRequestRedraw();
+            debouncedSaveState();
         });
         
         tokenColorInput.addEventListener('change', function() {
