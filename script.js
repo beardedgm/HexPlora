@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { SpatialHashGrid } from './spatialIndex.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
@@ -115,6 +116,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let isRemovingToken = false;
     let pendingTokenPos = null;
     let editingTokenIndex = -1;
+
+    // Spatial indexes
+    let hexIndex = new SpatialHashGrid(hexSize * 2);
+    let tokenIndex = new SpatialHashGrid(hexSize * 2);
 
     // History stacks for undo/redo
     let undoStack = [];
@@ -254,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         icon: t.icon || '',
                         notes: t.notes || ''
                     }));
+                    rebuildTokenIndex();
                 }
                 
                 syncStore();
@@ -529,6 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (event.key === 'Delete' && selectedTokenIndex !== -1) {
                 tokens.splice(selectedTokenIndex, 1);
                 selectedTokenIndex = -1;
+                rebuildTokenIndex();
                 requestRedraw();
                 saveState();
                 pushHistory();
@@ -679,6 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hexHeight = hexSize * Math.sqrt(3);
         }
 
+        hexIndex = new SpatialHashGrid(hexSize * 2);
         for (let row = 0; row < rowCount; row++) {
             for (let col = 0; col < columnCount; col++) {
                 let x, y;
@@ -705,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     vertices.push({x: px, y: py});
                 }
                 
-                hexes.push({
+                const hex = {
                     id: hexId,
                     x: x,
                     y: y,
@@ -713,11 +721,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     col: col,
                     revealed: isRevealed,
                     vertices: vertices
+                };
+                hexes.push(hex);
+                hexIndex.insert(hex, {
+                    xMin: x - hexSize,
+                    yMin: y - hexSize,
+                    xMax: x + hexSize,
+                    yMax: y + hexSize
                 });
             }
         }
         
         log(`Generated ${hexes.length} hexes, ${Object.keys(revealedHexes).length} already revealed`);
+        rebuildTokenIndex();
+    }
+
+    function rebuildTokenIndex() {
+        tokenIndex = new SpatialHashGrid(hexSize * 2);
+        for (let i = 0; i < tokens.length; i++) {
+            const t = tokens[i];
+            t._index = i;
+            tokenIndex.insert(t, {
+                xMin: t.x - hexSize * 0.4,
+                yMin: t.y - hexSize * 0.4,
+                xMax: t.x + hexSize * 0.4,
+                yMax: t.y + hexSize * 0.4
+            });
+        }
     }
     
     function drawHex(ctx, hex) {
@@ -935,6 +965,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function restoreSnapshot(snap) {
         revealedHexes = JSON.parse(JSON.stringify(snap.revealedHexes));
         tokens = JSON.parse(JSON.stringify(snap.tokens));
+        rebuildTokenIndex();
         zoomLevel = snap.zoomLevel;
         panX = snap.panX;
         panY = snap.panY;
@@ -1000,25 +1031,33 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return inside;
     }
-    
-    function findTokenAtPosition(x, y) {
-        // Adjust point coordinates for zoom and pan
-        const adjustedX = (x - panX) / zoomLevel;
-        const adjustedY = (y - panY) / zoomLevel;
-        
-        for (let i = tokens.length - 1; i >= 0; i--) {
-            const token = tokens[i];
-            const dx = token.x - adjustedX;
-            const dy = token.y - adjustedY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // Check if point is within token radius
-            if (distance <= hexSize * 0.4) {
-                return i; // Return index of found token
+
+    function findHexAtPosition(x, y) {
+        const worldX = (x - panX) / zoomLevel;
+        const worldY = (y - panY) / zoomLevel;
+        const candidates = hexIndex.queryPoint(worldX, worldY);
+        for (const hex of candidates) {
+            if (isPointInHex(x, y, hex)) {
+                return hex;
             }
         }
-        
-        return -1; // No token found
+        return null;
+    }
+    
+    function findTokenAtPosition(x, y) {
+        const worldX = (x - panX) / zoomLevel;
+        const worldY = (y - panY) / zoomLevel;
+        const candidates = tokenIndex.queryPoint(worldX, worldY);
+        for (let i = candidates.length - 1; i >= 0; i--) {
+            const token = candidates[i];
+            const dx = token.x - worldX;
+            const dy = token.y - worldY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance <= hexSize * 0.4) {
+                return token._index;
+            }
+        }
+        return -1;
     }
 
     // Get mouse coordinates relative to the canvas
@@ -1055,6 +1094,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (idx !== -1) {
                 tokens.splice(idx, 1);
                 selectedTokenIndex = -1;
+                rebuildTokenIndex();
                 saveState();
                 requestRedraw();
                 pushHistory();
@@ -1095,32 +1135,22 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Find which hex was clicked
         let hexFound = false;
-        
-        for (const hex of hexes) {
-            // In reveal mode, skip already revealed hexes
-            // In hide mode, skip already hidden hexes
-            if ((revealMode && hex.revealed) || (!revealMode && !hex.revealed)) continue;
-            
-            if (isPointInHex(x, y, hex)) {
-                // Toggle the hex based on the current mode
-                if (revealMode) {
-                    log(`Revealing hex: ${hex.id} at ${Math.round(hex.x)}, ${Math.round(hex.y)}`);
-                    hex.revealed = true;
-                    revealedHexes[hex.id] = true;
-                } else {
-                    log(`Hiding hex: ${hex.id} at ${Math.round(hex.x)}, ${Math.round(hex.y)}`);
-                    hex.revealed = false;
-                    delete revealedHexes[hex.id];
-                }
-
-                hexFound = true;
-
-                // Save state and redraw
-                saveState();
-                requestRedraw();
-                pushHistory();
-                break;
+        const hex = findHexAtPosition(x, y);
+        if (hex && !((revealMode && hex.revealed) || (!revealMode && !hex.revealed))) {
+            if (revealMode) {
+                log(`Revealing hex: ${hex.id} at ${Math.round(hex.x)}, ${Math.round(hex.y)}`);
+                hex.revealed = true;
+                revealedHexes[hex.id] = true;
+            } else {
+                log(`Hiding hex: ${hex.id} at ${Math.round(hex.x)}, ${Math.round(hex.y)}`);
+                hex.revealed = false;
+                delete revealedHexes[hex.id];
             }
+
+            hexFound = true;
+            saveState();
+            requestRedraw();
+            pushHistory();
         }
         
         if (!hexFound) {
@@ -1213,6 +1243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isDraggingToken = false;
             mapContainer.classList.remove('token-dragging');
             saveState(); // Save state after the token is moved
+            rebuildTokenIndex();
             pushHistory();
             log('Stopped token dragging');
         }
@@ -1253,13 +1284,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Update coordinate display based on mouse position
-        let hoveredHex = null;
-        for (const hex of hexes) {
-            if (isPointInHex(x, y, hex)) {
-                hoveredHex = hex;
-                break;
-            }
-        }
+        let hoveredHex = findHexAtPosition(x, y);
         updateCoordDisplay(hoveredHex);
         
         // Check for token hover to update cursor and tooltip
@@ -1391,6 +1416,8 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleAddTokenMode();
         }
 
+        rebuildTokenIndex();
+
         closeTokenLabelModal();
 
         saveState();
@@ -1473,6 +1500,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (confirm(`Are you sure you want to remove all ${tokens.length} tokens?`)) {
             tokens = [];
             selectedTokenIndex = -1;
+            rebuildTokenIndex();
             saveState();
             requestRedraw();
             pushHistory();
