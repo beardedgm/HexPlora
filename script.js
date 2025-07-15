@@ -127,6 +127,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Render loop state
     let needsRedraw = false;
 
+    // Flag to ensure we only attempt the default map once per load cycle
+    let defaultMapAttempted = false;
+
     // Utility: debounce execution of a function
     function debounce(fn, delay = 100) {
         let timerId;
@@ -542,6 +545,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Default map SVG
         const DEFAULT_MAP = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Crect width='1200' height='800' fill='%23567d46'/%3E%3Cpath d='M0,400 Q300,350 600,500 T1200,400' stroke='%234b93c8' stroke-width='30' fill='none'/%3E%3Cpath d='M800,100 Q850,350 700,600' stroke='%234b93c8' stroke-width='20' fill='none'/%3E%3Ccircle cx='600' cy='450' r='100' fill='%234b93c8'/%3E%3C/svg%3E";
+
+        // Reset fallback flag when loading a new URL
+        if (mapUrl && mapUrl !== DEFAULT_MAP) {
+            defaultMapAttempted = false;
+        }
         
         // If no URL provided, try to load from localStorage or use default
         if (!mapUrl || mapUrl.trim() === '') {
@@ -577,6 +585,9 @@ document.addEventListener('DOMContentLoaded', function() {
         img.onload = function() {
             clearTimeout(timeoutId);
             log(`Map loaded successfully: ${img.width}x${img.height}`);
+
+            // Reset fallback state after a successful load
+            defaultMapAttempted = false;
             
            mapImage = img;
            [mapCanvas, gridCanvas, tokenCanvas].forEach(c => {
@@ -626,8 +637,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show error status
             showStatus('Error loading map. Check the URL for typos or CORS issues.', 'error');
             
-            // If this wasn't the default map, try to load the default
-            if (failedUrl !== DEFAULT_MAP) {
+            // If this wasn't the default map, try to load the default once
+            if (failedUrl !== DEFAULT_MAP && !defaultMapAttempted) {
+                defaultMapAttempted = true;
                 log('Falling back to default map');
                 setTimeout(() => {
                     loadMap(DEFAULT_MAP);
