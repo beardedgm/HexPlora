@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tokenIconSelect = document.getElementById('token-icon-select');
     const tokenLabelConfirm = document.getElementById('token-label-confirm');
     const tokenLabelCancel = document.getElementById('token-label-cancel');
+    const tokenNotesInput = document.getElementById('token-notes-input');
     
     // Debug mode flag
     let debugMode = false;
@@ -98,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isAddingToken = false;
     let isRemovingToken = false;
     let pendingTokenPos = null;
+    let editingTokenIndex = -1;
 
     // History stacks for undo/redo
     let undoStack = [];
@@ -179,7 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         y: t.y,
                         color: t.color,
                         label: t.label || '',
-                        icon: t.icon || ''
+                        icon: t.icon || '',
+                        notes: t.notes || ''
                     }));
                 }
                 
@@ -333,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('mouseup', stopPanning);
         canvas.addEventListener('mouseleave', stopPanning);
+        canvas.addEventListener('dblclick', handleCanvasDoubleClick);
         
         // Prevent context menu on right-click but allow right-click event to be handled
         canvas.addEventListener('contextmenu', function(e) {
@@ -1022,6 +1026,23 @@ document.addEventListener('DOMContentLoaded', function() {
             log(`No ${revealMode ? 'unrevealed' : 'revealed'} hex found at click location`);
         }
     }
+
+    function handleCanvasDoubleClick(event) {
+        if (!mapImage || isAddingToken || isRemovingToken) return;
+
+        const { x, y } = getCanvasCoords(event, canvas);
+        const idx = findTokenAtPosition(x, y);
+        if (idx !== -1) {
+            editingTokenIndex = idx;
+            const token = tokens[idx];
+            tokenLabelInput.value = token.label || '';
+            if (tokenIconSelect) tokenIconSelect.value = token.icon || '';
+            tokenColorInput.value = token.color || tokenColor;
+            if (tokenNotesInput) tokenNotesInput.value = token.notes || '';
+            tokenLabelModal.style.display = 'block';
+            tokenLabelInput.focus();
+        }
+    }
     
     function handleZoom(event) {
         event.preventDefault();
@@ -1204,41 +1225,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tokenLabelInput.value = '';
         if (tokenIconSelect) tokenIconSelect.value = '';
+        tokenColorInput.value = tokenColor;
+        if (tokenNotesInput) tokenNotesInput.value = '';
         tokenLabelModal.style.display = 'block';
         tokenLabelInput.focus();
     }
 
     function confirmTokenLabel() {
-        if (!pendingTokenPos) return;
-
         const label = tokenLabelInput.value.trim();
         const icon = tokenIconSelect ? tokenIconSelect.value : '';
-        const newToken = {
-            x: pendingTokenPos.x,
-            y: pendingTokenPos.y,
-            color: tokenColor,
-            label: label,
-            icon: icon
-        };
+        const color = tokenColorInput.value || tokenColor;
+        const notes = tokenNotesInput ? tokenNotesInput.value.trim() : '';
 
-        tokens.push(newToken);
-        selectedTokenIndex = tokens.length - 1;
+        tokenColor = color; // update default
 
-        pendingTokenPos = null;
-        toggleAddTokenMode();
+        if (editingTokenIndex !== -1) {
+            const token = tokens[editingTokenIndex];
+            token.label = label;
+            token.icon = icon;
+            token.color = color;
+            token.notes = notes;
+            selectedTokenIndex = editingTokenIndex;
+            editingTokenIndex = -1;
+        } else {
+            if (!pendingTokenPos) return;
+            const newToken = {
+                x: pendingTokenPos.x,
+                y: pendingTokenPos.y,
+                color: color,
+                label: label,
+                icon: icon,
+                notes: notes
+            };
+            tokens.push(newToken);
+            selectedTokenIndex = tokens.length - 1;
+            pendingTokenPos = null;
+            toggleAddTokenMode();
+        }
+
         closeTokenLabelModal();
 
         saveState();
         drawMap();
         pushHistory();
 
-        log(`Added token at ${Math.round(newToken.x)}, ${Math.round(newToken.y)}`);
-        showStatus(`Token added (click and drag to move)`, 'success');
+        const msg = editingTokenIndex === -1 ? 'Token added (click and drag to move)' : 'Token updated';
+        showStatus(msg, 'success');
     }
 
     function closeTokenLabelModal() {
         tokenLabelModal.style.display = 'none';
         pendingTokenPos = null;
+        editingTokenIndex = -1;
     }
     
     // Toggle token add mode
@@ -1374,7 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleExport() {
         // Create the export object
         const exportData = {
-            version: 2, // Increment version for new features
+            version: 3, // Increment version for new features
             timestamp: new Date().toISOString(),
             mapUrl: mapUrlInput.value,
             settings: {
@@ -1466,7 +1504,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         y: t.y,
                         color: t.color,
                         label: t.label || '',
-                        icon: t.icon || ''
+                        icon: t.icon || '',
+                        notes: t.notes || ''
                     }));
                 }
                 
