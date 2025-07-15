@@ -421,9 +421,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Copy JSON to clipboard
         copyJsonBtn.addEventListener('click', function() {
-            exportJsonTextarea.select();
-            navigator.clipboard.writeText(exportJsonTextarea.value);
-            showStatus('Copied to clipboard!', 'success');
+            try {
+                exportJsonTextarea.select();
+                var promise = navigator.clipboard.writeText(exportJsonTextarea.value);
+                if (promise && typeof promise.then === 'function') {
+                    promise.then(() => {
+                        showStatus('Copied to clipboard!', 'success');
+                    }).catch(err => {
+                        console.error('Clipboard error:', err);
+                        showStatus('Failed to copy to clipboard', 'error');
+                    });
+                } else {
+                    showStatus('Copied to clipboard!', 'success');
+                }
+            } catch (err) {
+                console.error('Clipboard error:', err);
+                showStatus('Failed to copy to clipboard', 'error');
+            }
         });
         
         // Download JSON file
