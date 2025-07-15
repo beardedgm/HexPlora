@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const coordDisplay = document.getElementById('coord-display');
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
+    const tokenTooltip = document.getElementById('token-tooltip');
     
     // Export modal elements
     const exportModal = document.getElementById('export-modal');
@@ -43,6 +44,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Debug mode flag
     let debugMode = false;
+
+    // Tooltip state
+    let hoveredTokenIndex = -1;
+    let tooltipTimer = null;
     
     // Input fields
     const hexSizeInput = document.getElementById('hex-size');
@@ -936,7 +941,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleCanvasClick(event) {
         if (!mapImage) return;
-        
+
+        hideTooltip();
+
         // Calculate click position in canvas coordinates
         const { x, y } = getCanvasCoords(event, canvas);
         
@@ -1030,6 +1037,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleCanvasDoubleClick(event) {
         if (!mapImage || isAddingToken || isRemovingToken) return;
 
+        hideTooltip();
+
         const { x, y } = getCanvasCoords(event, canvas);
         const idx = findTokenAtPosition(x, y);
         if (idx !== -1) {
@@ -1089,7 +1098,9 @@ document.addEventListener('DOMContentLoaded', function() {
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
             mapContainer.classList.add('panning');
-            
+
+            hideTooltip();
+
             log('Started panning');
         }
     }
@@ -1100,7 +1111,9 @@ document.addEventListener('DOMContentLoaded', function() {
             mapContainer.classList.remove('panning');
             log('Stopped panning');
         }
-        
+
+        hideTooltip();
+
         // Also stop token dragging if it was happening
         if (isDraggingToken) {
             isDraggingToken = false;
@@ -1155,12 +1168,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         updateCoordDisplay(hoveredHex);
         
-        // Check for token hover to update cursor
+        // Check for token hover to update cursor and tooltip
         const tokenIndex = findTokenAtPosition(x, y);
         if (tokenIndex !== -1 && !isAddingToken && !isRemovingToken) {
             mapContainer.classList.add('token-hover');
+
+            if (tokenIndex !== hoveredTokenIndex) {
+                hideTooltip();
+                hoveredTokenIndex = tokenIndex;
+                if (tokens[tokenIndex].notes) {
+                    tooltipTimer = setTimeout(() => {
+                        if (hoveredTokenIndex === tokenIndex) {
+                            tokenTooltip.textContent = tokens[tokenIndex].notes;
+                            const rect = mapContainer.getBoundingClientRect();
+                            tokenTooltip.style.left = `${event.clientX - rect.left + 15}px`;
+                            tokenTooltip.style.top = `${event.clientY - rect.top + 15}px`;
+                            tokenTooltip.style.display = 'block';
+                        }
+                    }, 1000);
+                }
+            } else if (tokenTooltip.style.display === 'block') {
+                const rect = mapContainer.getBoundingClientRect();
+                tokenTooltip.style.left = `${event.clientX - rect.left + 15}px`;
+                tokenTooltip.style.top = `${event.clientY - rect.top + 15}px`;
+            }
         } else {
             mapContainer.classList.remove('token-hover');
+            hideTooltip();
         }
     }
     
@@ -1595,6 +1629,17 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error saving state:', error);
             log('Error saving state: ' + error.message);
+        }
+    }
+
+    function hideTooltip() {
+        if (tooltipTimer) {
+            clearTimeout(tooltipTimer);
+            tooltipTimer = null;
+        }
+        hoveredTokenIndex = -1;
+        if (tokenTooltip) {
+            tokenTooltip.style.display = 'none';
         }
     }
     
