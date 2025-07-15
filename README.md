@@ -10,6 +10,7 @@ HexPlora is a web-based viewer for tabletop-style maps. It overlays a hexagonal 
 - Customizable appearance for fog of war and grid lines.
 - Reveal/hide mode for managing fog of war directly on the canvas.
 - Add, move and clear tokens with customizable colors, labels and notes.
+- Hover over a token for a second to view its notes in a tooltip.
 - Zoom and pan support with mouse wheel and drag controls.
 - Import/export of the full map state (tokens with labels, notes, revealed hexes, settings).
 - Toggleable header and optional debug view.
@@ -46,7 +47,8 @@ The top header contains controls for map settings and appearance:
 A row of buttons below the settings provides quick actions:
 
 - **Mode: Reveal/Hide** – switches between revealing or hiding hexes.
- - **Add Token** – enables token placement. A modal lets you set the token label, color, icon and optional notes. Existing tokens can be dragged or cleared.
+- **Add Token** – enables token placement. A modal lets you set the token label, color, icon and optional notes. Existing tokens can be dragged or cleared.
+- **Hover Tokens** – pausing the cursor over a token for a second shows its notes.
 - **Reset View** – resets zoom and panning. **Reset Fog** hides all revealed hexes.
 - **Clear Tokens** – removes all tokens from the map.
 - **Toggle Debug** – shows internal debug information.

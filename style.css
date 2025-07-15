@@ -220,6 +220,21 @@ input[type="range"] {
 .map-container.token-dragging canvas { cursor: move; }
 .map-container.token-hover canvas { cursor: pointer; } /* When over a token */
 
+/* Tooltip for token notes */
+.token-tooltip {
+    position: absolute;
+    max-width: 200px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    z-index: 1010;
+    pointer-events: none;
+    display: none;
+    white-space: pre-wrap;
+}
+
 
 canvas {
     display: block; /* Remove extra space below canvas */
