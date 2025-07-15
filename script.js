@@ -1,7 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
-    const canvas = document.getElementById('map-canvas');
-    const ctx = canvas.getContext('2d');
+    const mapCanvas = document.getElementById('map-layer');
+    const gridCanvas = document.getElementById('grid-layer');
+    const tokenCanvas = document.getElementById('token-layer');
+    const mapCtx = mapCanvas.getContext('2d');
+    const gridCtx = gridCanvas.getContext('2d');
+    const tokenCtx = tokenCanvas.getContext('2d');
+
+    // The topmost canvas handles interaction
+    const canvas = tokenCanvas;
+    const ctx = tokenCtx;
     const loadingElement = document.getElementById('loading');
     const mapContainer = document.getElementById('map-container');
     const debugInfo = document.getElementById('debug-info');
@@ -110,6 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let undoStack = [];
     let redoStack = [];
 
+    // Render loop state
+    let needsRedraw = false;
+
     function hexToRgb(hex) {
         hex = hex.replace('#', '');
         if (hex.length === 3) {
@@ -207,79 +218,79 @@ document.addEventListener('DOMContentLoaded', function() {
         hexSizeInput.addEventListener('change', function() {
             hexSize = validateInput(this, 10, 300, 40);
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         offsetXInput.addEventListener('change', function() {
             offsetX = validateInput(this, -1000, 1000, 0);
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         offsetYInput.addEventListener('change', function() {
             offsetY = validateInput(this, -1000, 1000, 0);
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         columnsInput.addEventListener('change', function() {
             columnCount = validateInput(this, 1, 200, 20);
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         rowsInput.addEventListener('change', function() {
             rowCount = validateInput(this, 1, 200, 15);
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             saveState();
         });
 
         orientationInput.addEventListener('change', function() {
             orientation = this.value;
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         mapScaleInput.addEventListener('change', function() {
             mapScale = validateInput(this, 10, 500, 100);
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         // New appearance input event listeners
         fogColorInput.addEventListener('change', function() {
             fogColor = this.value;
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         fogOpacityInput.addEventListener('input', function() {
             fogOpacity = parseFloat(this.value);
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         gridColorInput.addEventListener('change', function() {
             gridColor = this.value;
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         gridThicknessInput.addEventListener('input', function() {
             gridThickness = parseFloat(this.value);
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
         tokenColorInput.addEventListener('change', function() {
             tokenColor = this.value;
-            drawMap();
+            requestRedraw();
             saveState();
         });
         
@@ -349,13 +360,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         window.addEventListener('resize', function() {
-            drawMap();
+            requestRedraw();
         });
         
         debugToggle.addEventListener('click', function() {
             debugMode = !debugMode;
             debugInfo.style.display = debugMode ? 'block' : 'none';
-            drawMap(); // Redraw to show debug info
+            requestRedraw(); // Redraw to show debug info
             log('Debug mode ' + (debugMode ? 'enabled' : 'disabled'));
         });
         
@@ -455,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     toggleAddTokenMode();
                 } else if (selectedTokenIndex !== -1) {
                     selectedTokenIndex = -1;
-                    drawMap();
+                    requestRedraw();
                 }
             }
             
@@ -463,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (event.key === 'Delete' && selectedTokenIndex !== -1) {
                 tokens.splice(selectedTokenIndex, 1);
                 selectedTokenIndex = -1;
-                drawMap();
+                requestRedraw();
                 saveState();
                 pushHistory();
                 showStatus('Token deleted', 'info');
@@ -503,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function loadMap(mapUrl) {
         loadingElement.style.display = 'flex';
-        canvas.style.display = 'none';
+        [mapCanvas, gridCanvas, tokenCanvas].forEach(c => c.style.display = 'none');
         loadingElement.textContent = 'Loading map...';
         
         // Default map SVG
@@ -545,10 +556,14 @@ document.addEventListener('DOMContentLoaded', function() {
             log(`Map loaded successfully: ${img.width}x${img.height}`);
             
             mapImage = img;
-            canvas.width = img.width;
-            canvas.height = img.height;
+            [mapCanvas, gridCanvas, tokenCanvas].forEach(c => {
+                c.width = img.width;
+                c.height = img.height;
+            });
             loadingElement.style.display = 'none';
-            canvas.style.display = 'block';
+            mapCanvas.style.display = 'block';
+            gridCanvas.style.display = 'block';
+            tokenCanvas.style.display = 'block';
             
             // Reset zoom and pan on new map load
             resetView();
@@ -561,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showStatus('Map loaded successfully!', 'success');
             
             generateHexGrid();
-            drawMap();
+            requestRedraw();
             pushHistory();
         };
         
@@ -689,17 +704,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function drawMap() {
-        if (!ctx || !mapImage) return;
-        
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Save current context state
-        ctx.save();
-        
-        // Apply pan and zoom transformations
-        ctx.translate(panX, panY);
-        ctx.scale(zoomLevel, zoomLevel);
+        if (!mapCtx || !mapImage) return;
+
+        // Clear layers
+        [mapCtx, gridCtx, tokenCtx].forEach(c => c.clearRect(0, 0, mapCanvas.width, mapCanvas.height));
+
+        // Save context state for all layers
+        [mapCtx, gridCtx, tokenCtx].forEach(c => {
+            c.save();
+            c.translate(panX, panY);
+            c.scale(zoomLevel, zoomLevel);
+        });
         
         // Get the scale factor
         const scaleRatio = mapScale / 100;
@@ -707,14 +722,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate scaled image dimensions
         const scaledWidth = mapImage.width * scaleRatio;
         const scaledHeight = mapImage.height * scaleRatio;
-        
-        // Draw the map image with scaling
-        ctx.drawImage(
-            mapImage,        // source image
-            0, 0,            // source x, y
-            mapImage.width, mapImage.height,  // source width, height
-            0, 0,            // destination x, y (keep at origin)
-            scaledWidth, scaledHeight         // destination width, height (scaled)
+
+        // Draw the map image with scaling on the base layer
+        mapCtx.drawImage(
+            mapImage,
+            0,
+            0,
+            mapImage.width,
+            mapImage.height,
+            0,
+            0,
+            scaledWidth,
+            scaledHeight
         );
         
         // Log scaling info in debug mode
@@ -722,26 +741,40 @@ document.addEventListener('DOMContentLoaded', function() {
             log(`Drawing map at scale ${scaleRatio} (${scaledWidth}x${scaledHeight}), zoom ${zoomLevel.toFixed(2)}`);
         }
         
+        // Determine visible bounds for culling
+        const viewLeft = -panX / zoomLevel;
+        const viewTop = -panY / zoomLevel;
+        const viewRight = viewLeft + mapCanvas.width / zoomLevel;
+        const viewBottom = viewTop + mapCanvas.height / zoomLevel;
+
         // Draw unrevealed hexes
-        ctx.strokeStyle = gridColor;
-        ctx.lineWidth = gridThickness;
+        gridCtx.strokeStyle = gridColor;
+        gridCtx.lineWidth = gridThickness;
         const { r, g, b } = hexToRgb(fogColor);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fogOpacity})`;
-        
+        gridCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fogOpacity})`;
+
         for (const hex of hexes) {
+            if (
+                hex.x + hexSize < viewLeft ||
+                hex.x - hexSize > viewRight ||
+                hex.y + hexSize < viewTop ||
+                hex.y - hexSize > viewBottom
+            ) {
+                continue;
+            }
+
             if (!hex.revealed) {
-                drawHex(ctx, hex);
-                ctx.fill();
-                ctx.stroke();
+                drawHex(gridCtx, hex);
+                gridCtx.fill();
+                gridCtx.stroke();
             } else if (debugMode) {
-                // In debug mode, show revealed hexes with a different style
-                ctx.save();
-                ctx.strokeStyle = 'yellow';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                drawHex(ctx, hex);
-                ctx.stroke();
-                ctx.restore();
+                gridCtx.save();
+                gridCtx.strokeStyle = 'yellow';
+                gridCtx.lineWidth = 2;
+                gridCtx.setLineDash([5, 5]);
+                drawHex(gridCtx, hex);
+                gridCtx.stroke();
+                gridCtx.restore();
             }
         }
         
@@ -749,64 +782,68 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 0; i < tokens.length; i++) {
             const token = tokens[i];
             const isSelected = i === selectedTokenIndex;
-            
-            // Draw token circle
-            ctx.beginPath();
-            ctx.arc(token.x, token.y, hexSize * 0.4, 0, Math.PI * 2);
-            
-            // Fill with token color
-            ctx.fillStyle = token.color || tokenColor;
-            ctx.fill();
-            
-            // Draw selection ring if selected
+
+            if (
+                token.x + hexSize < viewLeft ||
+                token.x - hexSize > viewRight ||
+                token.y + hexSize < viewTop ||
+                token.y - hexSize > viewBottom
+            ) {
+                continue;
+            }
+
+            tokenCtx.beginPath();
+            tokenCtx.arc(token.x, token.y, hexSize * 0.4, 0, Math.PI * 2);
+
+            tokenCtx.fillStyle = token.color || tokenColor;
+            tokenCtx.fill();
+
             if (isSelected) {
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 3;
-                ctx.stroke();
+                tokenCtx.strokeStyle = 'white';
+                tokenCtx.lineWidth = 3;
+                tokenCtx.stroke();
             } else {
-                // Draw border
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                tokenCtx.strokeStyle = 'black';
+                tokenCtx.lineWidth = 1;
+                tokenCtx.stroke();
             }
 
             if (token.icon) {
-                ctx.font = `${hexSize * 0.8}px \"Material Symbols Outlined\"`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = 'white';
-                ctx.fillText(token.icon, token.x, token.y);
+                tokenCtx.font = `${hexSize * 0.8}px \"Material Symbols Outlined\"`;
+                tokenCtx.textAlign = 'center';
+                tokenCtx.textBaseline = 'middle';
+                tokenCtx.fillStyle = 'white';
+                tokenCtx.fillText(token.icon, token.x, token.y);
             }
 
             if (token.label) {
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 2;
+                tokenCtx.font = '12px Arial';
+                tokenCtx.textAlign = 'center';
+                tokenCtx.textBaseline = 'top';
+                tokenCtx.fillStyle = 'white';
+                tokenCtx.strokeStyle = 'black';
+                tokenCtx.lineWidth = 2;
                 const textY = token.y + hexSize * 0.5;
-                ctx.strokeText(token.label, token.x, textY);
-                ctx.fillText(token.label, token.x, textY);
+                tokenCtx.strokeText(token.label, token.x, textY);
+                tokenCtx.fillText(token.label, token.x, textY);
             }
         }
         
         if (debugMode) {
-            // Show some debug stats
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(10, 10, 200, 100);
-            ctx.fillStyle = 'white';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillText(`Total Hexes: ${hexes.length}`, 20, 20);
-            ctx.fillText(`Revealed: ${Object.keys(revealedHexes).length}`, 20, 40);
-            ctx.fillText(`Mode: ${revealMode ? 'Reveal' : 'Hide'}`, 20, 60);
-            ctx.fillText(`Zoom: ${(zoomLevel * 100).toFixed(0)}%`, 20, 80);
+            tokenCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            tokenCtx.fillRect(10, 10, 200, 100);
+            tokenCtx.fillStyle = 'white';
+            tokenCtx.font = '12px Arial';
+            tokenCtx.textAlign = 'left';
+            tokenCtx.textBaseline = 'top';
+            tokenCtx.fillText(`Total Hexes: ${hexes.length}`, 20, 20);
+            tokenCtx.fillText(`Revealed: ${Object.keys(revealedHexes).length}`, 20, 40);
+            tokenCtx.fillText(`Mode: ${revealMode ? 'Reveal' : 'Hide'}`, 20, 60);
+            tokenCtx.fillText(`Zoom: ${(zoomLevel * 100).toFixed(0)}%`, 20, 80);
         }
         
         // Restore context state
-        ctx.restore();
+        [mapCtx, gridCtx, tokenCtx].forEach(c => c.restore());
         
         // Update zoom display
         updateZoomDisplay();
@@ -852,7 +889,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         saveState();
-        drawMap();
+        requestRedraw();
     }
 
     function pushHistory() {
@@ -962,7 +999,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tokens.splice(idx, 1);
                 selectedTokenIndex = -1;
                 saveState();
-                drawMap();
+                requestRedraw();
                 pushHistory();
                 showStatus('Token removed', 'success');
             } else {
@@ -981,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isDraggingToken = true;
             mapContainer.classList.add('token-dragging');
             
-            drawMap();
+            requestRedraw();
             showStatus(`Token selected (drag to move)`, 'info');
             return;
         } else {
@@ -995,7 +1032,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 selectedTokenIndex = -1;
-                drawMap();
+                requestRedraw();
             }
         }
         
@@ -1023,7 +1060,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Save state and redraw
                 saveState();
-                drawMap();
+                requestRedraw();
                 pushHistory();
                 break;
             }
@@ -1079,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         zoomLevel = newZoom;
         
         // Update display and redraw
-        drawMap();
+        requestRedraw();
         
         log(`Zoomed to ${(zoomLevel * 100).toFixed(0)}%`);
     }
@@ -1140,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', function() {
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
             
-            drawMap();
+            requestRedraw();
             return;
         }
         
@@ -1154,7 +1191,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tokens[selectedTokenIndex].x = worldX;
             tokens[selectedTokenIndex].y = worldY;
             
-            drawMap();
+            requestRedraw();
             return;
         }
         
@@ -1210,7 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Save state and redraw
             saveState();
-            drawMap();
+            requestRedraw();
             pushHistory();
 
             log('Map reset');
@@ -1242,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', function() {
         removeTokenBtn.classList.add('btn-warning');
         
         // Update display and redraw
-        drawMap();
+        requestRedraw();
 
         log('View reset');
         showStatus('View has been reset', 'info');
@@ -1300,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', function() {
         closeTokenLabelModal();
 
         saveState();
-        drawMap();
+        requestRedraw();
         pushHistory();
 
         const msg = editingTokenIndex === -1 ? 'Token added (click and drag to move)' : 'Token updated';
@@ -1380,7 +1417,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tokens = [];
             selectedTokenIndex = -1;
             saveState();
-            drawMap();
+            requestRedraw();
             pushHistory();
             log('All tokens cleared');
             showStatus('All tokens removed', 'info');
@@ -1401,7 +1438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showStatus(`Mode switched to: ${revealMode ? 'Reveal' : 'Hide'} hexes`, 'info');
         log(`Mode changed to: ${revealMode ? 'Reveal' : 'Hide'}`);
         
-        drawMap(); // Redraw to update any debug info
+        requestRedraw(); // Redraw to update any debug info
     }
     
     // Toggle header panel
@@ -1550,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     // Otherwise just regenerate the grid and redraw
                     generateHexGrid();
-                    drawMap();
+                    requestRedraw();
                 }
                 
                 // Save state
@@ -1684,4 +1721,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log(message);
     }
+
+    function requestRedraw() {
+        needsRedraw = true;
+    }
+
+    function renderLoop() {
+        if (needsRedraw) {
+            drawMap();
+            needsRedraw = false;
+        }
+        requestAnimationFrame(renderLoop);
+    }
+
+    // Start the render loop
+    requestAnimationFrame(renderLoop);
 });
