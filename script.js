@@ -578,10 +578,14 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(timeoutId);
             log(`Map loaded successfully: ${img.width}x${img.height}`);
             
-            mapImage = img;
-            [mapCanvas, gridCanvas, tokenCanvas].forEach(c => {
+           mapImage = img;
+           [mapCanvas, gridCanvas, tokenCanvas].forEach(c => {
+                // Set the canvas drawing buffer size
                 c.width = img.width;
                 c.height = img.height;
+                // Explicitly set CSS size so display matches the image
+                c.style.width = img.width + 'px';
+                c.style.height = img.height + 'px';
             });
             loadingElement.style.display = 'none';
             mapCanvas.style.display = 'block';
