@@ -698,7 +698,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function rebuildTokenIndex() {
-        tokenIndex = new SpatialHashGrid(hexSize * 2);
+        if (tokenIndex) {
+            // Reuse the existing spatial grid to avoid leaking old references
+            tokenIndex.clear();
+            tokenIndex.cellSize = hexSize * 2;
+        } else {
+            tokenIndex = new SpatialHashGrid(hexSize * 2);
+        }
+
         for (let i = 0; i < tokens.length; i++) {
             const t = tokens[i];
             t._index = i;
