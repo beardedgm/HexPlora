@@ -991,6 +991,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (undoStack.length <= 1) return;
         const current = undoStack.pop();
         redoStack.push(current);
+        if (redoStack.length > 100) redoStack.shift();
         const previous = undoStack[undoStack.length - 1];
         restoreSnapshot(previous);
         updateUndoRedoButtons();
@@ -1000,6 +1001,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (redoStack.length === 0) return;
         const redoState = redoStack.pop();
         undoStack.push(redoState);
+        if (undoStack.length > 100) undoStack.shift();
         restoreSnapshot(redoState);
         updateUndoRedoButtons();
     }
